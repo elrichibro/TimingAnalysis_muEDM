@@ -12,7 +12,16 @@
   
   "analysis": {
     "analysis_mode":"Event",
-    "channels":[[2, 4, 20, 22], [3, 5, 23, 25]] 
+    "channels":[[2, 4, 20, 22], [3, 5, 23, 25]], 
+    "d_ToA":{
+        "ToA1":"Fabio",
+        "ToA2":"Pippo"
+    },
+    "f_ToA":{
+        "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
+        "ToA_list":[["ToA1, ToA2", "ToA3", "ToA4"], ["ToA9, ToA10", "ToA11", "ToA12"]],
+        "ToA_out": ["ToA_TOF", "ToA_GATE"]
+    }
   },
 
   "plot": {
@@ -20,5 +29,4 @@
     "min": 0.0,
     "max":600
   }
-
 }
