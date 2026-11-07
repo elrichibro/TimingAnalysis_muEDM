@@ -43,6 +43,13 @@ int Configure(config_struct& value, const std::string& json_path) {
 
             value.analysis.analysis_mode = j.value("analysis_mode", value.analysis.analysis_mode);     
             value.analysis.channels = j.value("channels", value.analysis.channels);
+
+            value.analysis.d_ToA.ToA1 = j["d_ToA"].value("ToA1", value.analysis.d_ToA.ToA1);
+            value.analysis.d_ToA.ToA2 = j["d_ToA"].value("ToA2", value.analysis.d_ToA.ToA2);
+
+            value.analysis.f_ToA.channels = j["f_ToA"].value("channels", value.analysis.f_ToA.channels);
+            value.analysis.f_ToA.ToA_list = j["f_ToA"].value("ToA_list", value.analysis.f_ToA.ToA_list);
+            value.analysis.f_ToA.ToA_out = j["f_ToA"].value("ToA_out", value.analysis.f_ToA.ToA_out);
         }
 
         if (json_obj.contains("plot")) {
@@ -123,7 +130,52 @@ void Verbose_config(const config_struct& value) {
     }
     std::cout << std::endl;
 
-    std::cout << "" << std::endl;
+    std::cout << "    Delta ToA:" << std::endl;
+    std::cout << "        ToA1: " << value.analysis.d_ToA.ToA1 << std::endl;
+    std::cout << "        ToA2: " << value.analysis.d_ToA.ToA2 << std::endl; 
+
+    std::cout << "    First ToA:" << std::endl;
+    std::cout << "        Analyzed channels: ";
+    for(size_t i = 0; i < value.analysis.f_ToA.channels.size(); i++) {
+        std::cout << "{";
+        
+        for (size_t j = 0; j < value.analysis.f_ToA.channels[i].size(); j++) {
+            std::cout << value.analysis.f_ToA.channels[i][j];
+            
+            if(j != (value.analysis.f_ToA.channels[i].size() - 1)) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}";
+    }
+    std::cout << std::endl;
+    
+    std::cout << "        ToA list: ";
+    for(size_t i = 0; i < value.analysis.f_ToA.ToA_list.size(); i++) {
+        std::cout << "{";
+        
+        for (size_t j = 0; j < value.analysis.f_ToA.ToA_list[i].size(); j++) {
+            std::cout << value.analysis.f_ToA.ToA_list[i][j];
+            
+            if(j != (value.analysis.f_ToA.ToA_list[i].size() - 1)) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}";
+    }
+    std::cout << std::endl;
+
+    std::cout << "        ToA out: {";
+    for(size_t i = 0; i < value.analysis.f_ToA.ToA_out.size(); i++) {
+        std::cout << value.analysis.f_ToA.ToA_out[i];
+        
+        if(i != (value.analysis.f_ToA.ToA_out.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+
     std::cout << "--------------------------------------------------------------------" << std::endl;
 
     // -----

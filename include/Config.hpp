@@ -16,9 +16,22 @@ struct io_config {
     std::string in_data_file = "";// Input data file path
 };
 
+struct delta_ToA {
+    std::string ToA1 = "";
+    std::string ToA2 = "";
+};
+
+struct first_ToA {
+    std::vector<std::vector<int>> channels;
+    std::vector<std::vector<std::string>> ToA_list;
+    std::vector<std::string> ToA_out;
+};
+
 struct analysis_config {
     std::string analysis_mode;
     std::vector<std::vector<int>> channels;
+    delta_ToA d_ToA;
+    first_ToA f_ToA;
 };
 
 struct plot_config {

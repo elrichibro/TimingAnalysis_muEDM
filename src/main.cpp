@@ -1,10 +1,86 @@
 #include "Config.hpp"
 #include "Filter.hpp"
+#include "Visualizer.hpp"
 
 #include <ROOT/RDataFrame.hxx>
 
 #include <iostream>
 #include <string>
+
+
+void analisi_TOT(int bins, double min, double max, const std::vector<int> channels) {
+    TH1::AddDirectory(kFALSE);
+
+    static int run_id = 0;
+    run_id++;
+
+    ROOT::EnableImplicitMT();
+
+    std::string path_name = "./dati/03_11_26/root/Run_Gate_TOF_50mV.root";
+
+    ROOT::RDataFrame data_frame("Event", path_name);
+    ROOT::RDF::RNode node = data_frame;
+
+    node = DefineTOT_Node(node, channels);
+    
+    std::string canvas_name = "c_all_" + std::to_string(run_id); 
+    TCanvas* c_all = new TCanvas(canvas_name.c_str(), "ToT", 800, 600);
+    
+    int ret = PlotTOT(c_all, node, channels, bins, min, max, run_id);
+
+    if (ret != 0) {
+        printf("ERROR -> ret: %d\n", ret);
+        return;
+    }
+}
+
+/*
+void analisi_TOA_MEAN(int bins ,double min, double max, const std::vector<int> channels) {
+    TH1::AddDirectory(kFALSE);
+
+    static int run_id = 0;
+    run_id++;
+    
+    ROOT::EnableImplicitMT();
+
+    std::string path_name = "./dati/03_11_26/root/Run_Gate_TOF_50mV.root";
+
+    ROOT::RDataFrame data_frame("Event", path_name);
+    
+    ROOT::RDF::RNode node = data_frame;
+
+    node = DefineTOA_mean_Node(node, channels);
+
+    for (size_t i = 0; i < channels.size(); i++) {
+        std::string ch = std::to_string(channels[i]);
+        node = node     
+            .Define("Mask_Ch" + ch, "FD01_channel == " + ch)
+            .Define("Mask_Lead", "FD01_edge == 1")
+
+            .Define("ToA_Ch" + ch + "_Lead", "FD01_ToA[Mask_Ch" + ch + " && Mask_Lead]")
+
+            .Define("ToA_Ch" + ch + "_Lead_0", "!ToA_Ch" + ch + "_Lead.empty() ? ToA_Ch" + ch + "_Lead[0] : -999.0");
+    }
+
+    std::vector<std::vector<int>> input;
+    input.push_back(channels);
+
+    node = DefineEventFirst_Node(node, input);
+
+    std::string canvas_name = "c_all_" + std::to_string(run_id); 
+    TCanvas* c_all = new TCanvas(canvas_name.c_str(), "ToA", 800, 600);
+
+    int ret = PlotTOA_MEAN(c_all, node, channels, bins, min, max, run_id);
+    
+    if(ret != 0) {
+        printf("ERROR -> ret: %d\n", ret);
+        return;
+    }
+}
+*/
+// -----------------------------------------------------------------------------------------------------------------------------------
+// MAIN
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
 
@@ -50,10 +126,16 @@ int main(int argc, char* argv[]) {
         Verbose_config(cfg);
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------------
+    // OPERATION
+    // ------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
 
-    
+
+
+
+
 }
