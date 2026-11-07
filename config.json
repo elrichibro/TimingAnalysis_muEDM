@@ -1,0 +1,24 @@
+{
+  "general": { 
+    "operation_mode":"ToA",
+    "verbose": 1,
+    "visualize":true
+  },
+  
+  "io": {
+    "tree_data_name":"Events",
+    "in_data_file":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root"
+    },
+  
+  "analysis": {
+    "analysis_mode":"Event",
+    "channels":[[2, 4, 20, 22], [3, 5, 23, 25]] 
+  },
+
+  "plot": {
+    "bins": 100,
+    "min": 0.0,
+    "max":600
+  }
+
+}
