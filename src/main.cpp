@@ -1,11 +1,14 @@
 #include "Config.hpp"
 #include "Filter.hpp"
 #include "Visualizer.hpp"
+#include "Operations.hpp"
 
 #include <ROOT/RDataFrame.hxx>
 
 #include <iostream>
 #include <string>
+
+#include <TApplication.h>
 
 
 void analisi_TOT(int bins, double min, double max, const std::vector<int> channels) {
@@ -130,12 +133,38 @@ int main(int argc, char* argv[]) {
     // OPERATION
     // ------------------------------------------------------------------------------------------------------------------------------------
 
+    ROOT::EnableImplicitMT();// MultiThread option: ON
+
+    TApplication* app = nullptr;
+    if (visualize) {
+        std::cout << "TApplication inializating ..." << std::endl;
+        app = new TApplication("app", &argc, argv);
+    }
+
+    // ---------
+    // Delta ToA
+    // ---------
 
 
+    TCanvas* c_DeltaToA = new TCanvas("c_DeltaToA", "DeltaToA", 800, 600);
 
+    if (cfg.general.operation_mode.find("DeltaToA") != std::string::npos) {
+        ROOT::RDataFrame data_frame(cfg.io.tree_data_name, cfg.io.in_data_file);
+        ROOT::RDF::RNode node_DeltaToA = data_frame;
 
+        node_DeltaToA = FirstToA_Node(node_DeltaToA, cfg.analysis.f_ToA);
+        node_DeltaToA = CalculateDelta_FirstToA(node_DeltaToA, cfg.analysis.f_ToA);
+        
+        
+        int ret = Plot_DeltaFirstToA(c_DeltaToA, node_DeltaToA, cfg.analysis.f_ToA, cfg.canvas.plot_delta_ToA);
 
+        app->Run();
+            
+        delete app;
+        app = nullptr; 
+    } else {
+        printf("ERROR: invalid operation mode, exiting...");
+    }
 
-
-
+    return 0;
 }

@@ -1,12 +1,12 @@
 {
   "general": { 
-    "operation_mode":"ToA",
+    "operation_mode":"DeltaToA",
     "verbose": 1,
     "visualize":true
   },
   
   "io": {
-    "tree_data_name":"Events",
+    "tree_data_name":"Event",
     "in_data_file":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root"
     },
   
@@ -17,16 +17,28 @@
         "ToA1":"Fabio",
         "ToA2":"Pippo"
     },
+
     "f_ToA":{
         "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
         "ToA_list":[["ToA1, ToA2", "ToA3", "ToA4"], ["ToA9, ToA10", "ToA11", "ToA12"]],
-        "ToA_out": ["ToA_TOF", "ToA_GATE"]
+        "ToA_out": ["ToA_GATE", "ToA_TOF"],
+        "Delta":"Delta_FirstToA"
+    },
+
+    "ToT":{
+        "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
+        "ToT_list":[["ToT1", "ToT2", "ToT3", "ToT4"], ["ToT9", "ToT10", "ToT11", "ToT12"]],
+        "ToT_first": ["ToT_GATE", "ToT_TOF"]
     }
   },
 
-  "plot": {
-    "bins": 100,
-    "min": 0.0,
-    "max":600
+  "canvas": {
+    "plot_delta_ToA":{
+        "bins": 100,
+        "min": -10.0,
+        "max":2.0,
+        "title":"Delta between first ToA;GATE[0]-TOF[0];Events"
+    }
+
   }
 }

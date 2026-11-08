@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/analyze.dir/src/Config.cpp.o.d"
   "CMakeFiles/analyze.dir/src/Filter.cpp.o"
   "CMakeFiles/analyze.dir/src/Filter.cpp.o.d"
+  "CMakeFiles/analyze.dir/src/Operations.cpp.o"
+  "CMakeFiles/analyze.dir/src/Operations.cpp.o.d"
   "CMakeFiles/analyze.dir/src/Visualizer.cpp.o"
   "CMakeFiles/analyze.dir/src/Visualizer.cpp.o.d"
   "CMakeFiles/analyze.dir/src/main.cpp.o"

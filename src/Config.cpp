@@ -50,14 +50,21 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.analysis.f_ToA.channels = j["f_ToA"].value("channels", value.analysis.f_ToA.channels);
             value.analysis.f_ToA.ToA_list = j["f_ToA"].value("ToA_list", value.analysis.f_ToA.ToA_list);
             value.analysis.f_ToA.ToA_out = j["f_ToA"].value("ToA_out", value.analysis.f_ToA.ToA_out);
+
+            value.analysis.f_ToA.Delta = j["f_ToA"].value("Delta", value.analysis.f_ToA.Delta);
+        
+            value.analysis.ToT.channels = j["ToT"].value("channels", value.analysis.ToT.channels);
+            value.analysis.ToT.ToT_list = j["ToT"].value("ToT_list", value.analysis.ToT.ToT_list);
+            value.analysis.ToT.ToT_first = j["ToT"].value("ToT_first", value.analysis.ToT.ToT_first);
         }
 
-        if (json_obj.contains("plot")) {
-            const auto& j = json_obj["plot"];
+        if (json_obj.contains("canvas")) {
+            const auto& j = json_obj["canvas"];
 
-            value.plot.bins = j.value("bins", value.plot.bins);
-            value.plot.min = j.value("min", value.plot.min);
-            value.plot.max = j.value("max", value.plot.max);
+            value.canvas.plot_delta_ToA.bins = j["plot_delta_ToA"].value("bins", value.canvas.plot_delta_ToA.bins);
+            value.canvas.plot_delta_ToA.min = j["plot_delta_ToA"].value("min", value.canvas.plot_delta_ToA.min);
+            value.canvas.plot_delta_ToA.max = j["plot_delta_ToA"].value("max", value.canvas.plot_delta_ToA.max);
+            value.canvas.plot_delta_ToA.title = j["plot_delta_ToA"].value("title", value.canvas.plot_delta_ToA.title);
         }
     } catch (const std::exception& except) {
         std::cout << "ERROR: " << except.what() << std::endl;
@@ -175,6 +182,48 @@ void Verbose_config(const config_struct& value) {
     }
     std::cout << "}" << std::endl;
 
+    std::cout << "        Delta first ToA: " << value.analysis.f_ToA.Delta << std::endl;
+
+    std::cout << "    First ToT:" << std::endl;
+    std::cout << "        ToT channels: ";
+    for(size_t i = 0; i < value.analysis.ToT.channels.size(); i++) {
+        std::cout << "{";
+        
+        for (size_t j = 0; j < value.analysis.ToT.channels[i].size(); j++) {
+            std::cout << value.analysis.ToT.channels[i][j];
+            
+            if(j != (value.analysis.ToT.channels[i].size() - 1)) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}";
+    }
+    std::cout << std::endl;
+    
+    std::cout << "        ToT list: ";
+    for(size_t i = 0; i < value.analysis.ToT.ToT_list.size(); i++) {
+        std::cout << "{";
+        
+        for (size_t j = 0; j < value.analysis.ToT.ToT_list[i].size(); j++) {
+            std::cout << value.analysis.ToT.ToT_list[i][j];
+            
+            if(j != (value.analysis.ToT.ToT_list[i].size() - 1)) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}";
+    }
+    std::cout << std::endl;
+
+    std::cout << "        ToT first: {";
+    for(size_t i = 0; i < value.analysis.ToT.ToT_first.size(); i++) {
+        std::cout << value.analysis.ToT.ToT_first[i];
+        
+        if(i != (value.analysis.ToT.ToT_first.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
 
     std::cout << "--------------------------------------------------------------------" << std::endl;
 
@@ -185,14 +234,16 @@ void Verbose_config(const config_struct& value) {
     std::cout << "--------------------------------------------------------------------" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << "Plot settings:" << std::endl;
+    std::cout << "Canvas settings:" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << "    Plot bins: " << value.plot.bins << std::endl;
-    std::cout << "    Plot min bin value: " << value.plot.min << std::endl;
-    std::cout << "    Plot max bin value: " << value.plot.max << std::endl;
 
-  
+    std::cout << "    Plot Delta fisrt ToA: " << std::endl;
+    std::cout << "        Plot bin value: " << value.canvas.plot_delta_ToA.bins << std::endl;
+    std::cout << "        Plot min bin value: " << value.canvas.plot_delta_ToA.min << std::endl;
+    std::cout << "        Plot max bin value: " << value.canvas.plot_delta_ToA.max << std::endl;
+    std::cout << "        Plot title: " << value.canvas.plot_delta_ToA.title << std::endl;
+
     std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
     

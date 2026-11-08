@@ -12,8 +12,9 @@
 
 ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {   
     node = node
+        .Define("ToA_ns", "(FD01_ToA * 3.125)/1000")
         .Define("Mask_Lead", "FD01_edge == 1")
-        .Define("ToA_Lead", "FD01_ToA[Mask_Lead]")
+        .Define("ToA_Lead", "ToA_ns[Mask_Lead]")
         .Define("Ch_Lead", "FD01_channel[Mask_Lead]");
 
     std::vector<std::vector<int>> channels = f_ToA.channels;
@@ -25,16 +26,10 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {
         for (size_t k = 0; k < channels.size(); ++k) {
             seen[k].resize(channels[k].size(), false);
         }        
-        
-        int current_channel = -1;
-        
+                
         for(size_t j = 0; j < toa.size(); j++) {
             for(size_t k = 0; k < channels.size(); k++) {
                 for (size_t m = 0; m < channels[k].size(); m++) {
-                    if (ch[j] == current_channel) {
-                        continue;
-                    }
-
                     if (ch[j] == channels[k][m]) {
 
                         if (!seen[k][m]) {
@@ -47,7 +42,7 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {
             }
         }
     
-        std::vector<double> result(channels.size(), -999.0);
+        std::vector<double> result(channels.size(), -9999.0);
 
         for (size_t k = 0; k < channels.size(); k++) {
             if (!current_toa[k].empty()) {
@@ -78,7 +73,7 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {
 // TOT
 // -------------------------------------------------------------------------------------------
 
-ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const std::vector<int>& channels) {
+ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const first_ToT& ToT) {
     auto calc_TOT = [](const ROOT::RVec<double>& time, const ROOT::RVec<uint8_t>& edge) {
         ROOT::RVec<double> tot;
         const size_t n = time.size();
@@ -96,17 +91,30 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const std::vector<int>& c
     };
 
 
+    std::vector<std::vector<int>> channels = ToT.channels;
+
+    node = node.Define("ToA_ns", "(FD01_ToA * 3.125)/1000");
+
     for (size_t i = 0; i < channels.size(); i++) {
-        std::string ch = std::to_string(channels[i]);
-        
-        node = node     
-            .Define("Mask_Ch" + ch, "(FD01_channel == " + ch + ")")
-            
-            .Define("ToA_Ch" + ch, "FD01_ToA[Mask_Ch" + ch + "]")
-            .Define("Edge_Ch" + ch, "FD01_edge[Mask_Ch" + ch + "]")
-            
-            .Define("ToT_Ch" + ch, calc_TOT, {"ToA_Ch" + ch, "Edge_Ch" + ch});
+        if(channels[i].size() != ToT.ToT_list[i].size()) {
+            printf("Mismatch between dimensions in DefineToT_Node, channels vector is %lu, ToT_list is %lu.\n", channels[i].size(), ToT.ToT_list[i].size());
+            return node;
+        }
+
+        for(size_t j = 0; j < channels[i].size(); j++) {
+            std::string ch = std::to_string(channels[i][j]);
+            std::string tot_col = ToT.ToT_list[i][j];
+
+            node = node
+                .Define("Mask_Ch" + ch, "(FD01_channel == " + ch + ")")
+                
+                .Define("ToA_Ch" + ch, "ToA_ns[Mask_Ch" + ch + "]")
+                .Define("Edge_Ch" + ch, "FD01_edge[Mask_Ch" + ch + "]")
+                
+                .Define(tot_col, calc_TOT, {"ToA_Ch" + ch, "Edge_Ch" + ch});
+        }
     }
+
     return node;
 }
 

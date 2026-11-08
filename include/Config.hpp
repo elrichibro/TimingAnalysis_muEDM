@@ -25,6 +25,13 @@ struct first_ToA {
     std::vector<std::vector<int>> channels;
     std::vector<std::vector<std::string>> ToA_list;
     std::vector<std::string> ToA_out;
+    std::string Delta;
+};
+
+struct first_ToT {
+    std::vector<std::vector<int>> channels;
+    std::vector<std::vector<std::string>> ToT_list;
+    std::vector<std::string> ToT_first;
 };
 
 struct analysis_config {
@@ -32,19 +39,25 @@ struct analysis_config {
     std::vector<std::vector<int>> channels;
     delta_ToA d_ToA;
     first_ToA f_ToA;
+    first_ToT ToT;
 };
 
 struct plot_config {
     int bins;
     double min;
     double max;
+    std::string title;
+};
+
+struct canvas_config {
+    plot_config plot_delta_ToA;
 };
 
 struct config_struct {
     general_config general;
     io_config io;
     analysis_config analysis;
-    plot_config plot;
+    canvas_config canvas;
 };
 
 // -----------------------
