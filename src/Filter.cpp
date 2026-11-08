@@ -10,14 +10,18 @@
 // FIRST OF EVENT   
 // ------------------------------------------------
 
-ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {   
+ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const config_struct& cfg) {
+    std::string ToA_mask =  cfg.io.columns.ToA + "* 3.125/1000";
+    std::string edge_mask = cfg.io.columns.edge + "== 1";
+    std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]"; 
+    
     node = node
-        .Define("ToA_ns", "(FD01_ToA * 3.125)/1000")
-        .Define("Mask_Lead", "FD01_edge == 1")
+        .Define("ToA_ns", ToA_mask.c_str())
+        .Define("Mask_Lead", edge_mask.c_str())
         .Define("ToA_Lead", "ToA_ns[Mask_Lead]")
-        .Define("Ch_Lead", "FD01_channel[Mask_Lead]");
+        .Define("Ch_Lead", channel_mask.c_str());
 
-    std::vector<std::vector<int>> channels = f_ToA.channels;
+    std::vector<std::vector<int>> channels = cfg.analysis.f_ToA.channels;
 
     auto Calculate_first = [channels](const ROOT::RVec<double>& toa, const ROOT::RVec<unsigned char>& ch) -> std::vector<double> {
         std::vector<std::vector<double>> current_toa(channels.size());
@@ -56,7 +60,7 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {
 
     node = node.Define("Event_ToA_0", Calculate_first, {"ToA_Lead", "Ch_Lead"});
 
-    std::vector<std::string> toa_out = f_ToA.ToA_out;
+    std::vector<std::string> toa_out = cfg.analysis.f_ToA.ToA_out;
     
     for (size_t k = 0; k < channels.size(); k++) {
         std::string col_name = toa_out[k];
@@ -73,7 +77,10 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA) {
 // TOT
 // -------------------------------------------------------------------------------------------
 
-ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const first_ToT& ToT) {
+ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg) {
+    auto ToT = cfg.analysis.ToT;
+    auto Column = cfg.io.columns;
+    
     auto calc_TOT = [](const ROOT::RVec<double>& time, const ROOT::RVec<uint8_t>& edge) {
         ROOT::RVec<double> tot;
         const size_t n = time.size();
@@ -91,9 +98,10 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const first_ToT& ToT) {
     };
 
 
-    std::vector<std::vector<int>> channels = ToT.channels;
-
-    node = node.Define("ToA_ns", "(FD01_ToA * 3.125)/1000");
+    std::vector<std::vector<int>> channels = cfg.analysis.ToT.channels;
+    std::string ToA_column =  cfg.io.columns.ToA + "* 3.125/1000";
+    
+    node = node.Define("ToA_ns", ToA_column.c_str());
 
     for (size_t i = 0; i < channels.size(); i++) {
         if(channels[i].size() != ToT.ToT_list[i].size()) {
@@ -105,11 +113,14 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const first_ToT& ToT) {
             std::string ch = std::to_string(channels[i][j]);
             std::string tot_col = ToT.ToT_list[i][j];
 
+            std::string channel_column = Column.channel + ch;
+            std::string edge_column = Column.edge + "[Mask_Ch" + ch + "]";
+
             node = node
-                .Define("Mask_Ch" + ch, "(FD01_channel == " + ch + ")")
+                .Define("Mask_Ch" + ch, channel_column.c_str())
                 
                 .Define("ToA_Ch" + ch, "ToA_ns[Mask_Ch" + ch + "]")
-                .Define("Edge_Ch" + ch, "FD01_edge[Mask_Ch" + ch + "]")
+                .Define("Edge_Ch" + ch, edge_column.c_str())
                 
                 .Define(tot_col, calc_TOT, {"ToA_Ch" + ch, "Edge_Ch" + ch});
         }

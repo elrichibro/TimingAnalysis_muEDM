@@ -1,44 +1,58 @@
 {
-  "general": { 
-    "operation_mode":"DeltaToA",
-    "verbose": 1,
-    "visualize":true
-  },
-  
-  "io": {
-    "tree_data_name":"Event",
-    "in_data_file":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root"
+    "general": { 
+        "operation_mode":"DeltaToA",
+        "verbose": 1,
+        "visualize":true
     },
   
-  "analysis": {
-    "analysis_mode":"Event",
-    "channels":[[2, 4, 20, 22], [3, 5, 23, 25]], 
-    "d_ToA":{
-        "ToA1":"Fabio",
-        "ToA2":"Pippo"
+    "io": {
+        "tree_data_name":"Event",
+        "in_data_file":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root",
+        "columns":{
+            "channel":"FD01_channel",
+            "edge":"FD01_edge",
+            "ToA":"FD01_ToA",
+            "ToT":"FD01_ToT"
+        }
+    },
+  
+    "efficiency": {
+        "ref_channel":[2, 4, 20, 22], 
+        "eff_channel":[3, 5, 23, 25],
+        "Events":{
+
+        }
     },
 
-    "f_ToA":{
-        "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
-        "ToA_list":[["ToA1, ToA2", "ToA3", "ToA4"], ["ToA9, ToA10", "ToA11", "ToA12"]],
-        "ToA_out": ["ToA_GATE", "ToA_TOF"],
-        "Delta":"Delta_FirstToA"
+    "analysis": {
+        "analysis_mode":"Event",
+        "channels":[[2, 4, 20, 22], [3, 5, 23, 25]], 
+        
+        "d_ToA":{
+            "ToA1":"Fabio",
+            "ToA2":"Pippo"
+        },
+
+        "f_ToA":{
+            "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
+            "ToA_list":[["ToA1, ToA2", "ToA3", "ToA4"], ["ToA9, ToA10", "ToA11", "ToA12"]],
+            "ToA_out": ["ToA_GATE", "ToA_TOF"],
+            "Delta":"Delta_FirstToA"
+        },
+
+        "ToT":{
+            "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
+            "ToT_list":[["ToT1", "ToT2", "ToT3", "ToT4"], ["ToT9", "ToT10", "ToT11", "ToT12"]],
+            "ToT_first": ["ToT_GATE", "ToT_TOF"]
+        }
     },
 
-    "ToT":{
-        "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
-        "ToT_list":[["ToT1", "ToT2", "ToT3", "ToT4"], ["ToT9", "ToT10", "ToT11", "ToT12"]],
-        "ToT_first": ["ToT_GATE", "ToT_TOF"]
+    "canvas": {
+        "plot_delta_ToA":{
+            "bins": 100,
+            "min": -10.0,
+            "max":2.0,
+            "title":"Delta between first ToA;GATE[0]-TOF[0];Events"
+        }
     }
-  },
-
-  "canvas": {
-    "plot_delta_ToA":{
-        "bins": 100,
-        "min": -10.0,
-        "max":2.0,
-        "title":"Delta between first ToA;GATE[0]-TOF[0];Events"
-    }
-
-  }
 }

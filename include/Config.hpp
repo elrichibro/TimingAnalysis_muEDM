@@ -5,15 +5,31 @@
 #include <vector>
 
 struct general_config {
-    std::string operation_mode = "";// Operation mode
-    int verbose = 0;// General verbose flag
-    bool visualize = false;// General visualization flag
+    std::string operation_mode = "";
+    int verbose = 0;
+    bool visualize = false;
 };
 
-/// @brief Stores input/output file paths
+struct columns_config {
+    std::string channel = "";
+    std::string edge = "";
+    std::string ToA = "";
+    std::string ToT = "";
+};
+
 struct io_config {
-    std::string tree_data_name = "";// Data tree name
-    std::string in_data_file = "";// Input data file path
+    std::string tree_data_name = "";
+    std::string in_data_file = "";
+    columns_config columns;
+};
+
+struct events_config {
+
+};
+
+struct efficiency_config {
+    std::vector<int> ref_channel;
+    std::vector<int> eff_channel;
 };
 
 struct delta_ToA {
@@ -56,6 +72,7 @@ struct canvas_config {
 struct config_struct {
     general_config general;
     io_config io;
+    efficiency_config efficiency;
     analysis_config analysis;
     canvas_config canvas;
 };
