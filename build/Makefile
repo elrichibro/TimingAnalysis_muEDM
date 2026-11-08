@@ -190,6 +190,30 @@ src/Filter.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/analyze.dir/build.make CMakeFiles/analyze.dir/src/Filter.cpp.s
 .PHONY : src/Filter.cpp.s
 
+src/Operations.o: src/Operations.cpp.o
+.PHONY : src/Operations.o
+
+# target to build an object file
+src/Operations.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/analyze.dir/build.make CMakeFiles/analyze.dir/src/Operations.cpp.o
+.PHONY : src/Operations.cpp.o
+
+src/Operations.i: src/Operations.cpp.i
+.PHONY : src/Operations.i
+
+# target to preprocess a source file
+src/Operations.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/analyze.dir/build.make CMakeFiles/analyze.dir/src/Operations.cpp.i
+.PHONY : src/Operations.cpp.i
+
+src/Operations.s: src/Operations.cpp.s
+.PHONY : src/Operations.s
+
+# target to generate assembly for a file
+src/Operations.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/analyze.dir/build.make CMakeFiles/analyze.dir/src/Operations.cpp.s
+.PHONY : src/Operations.cpp.s
+
 src/Visualizer.o: src/Visualizer.cpp.o
 .PHONY : src/Visualizer.o
 
@@ -254,6 +278,9 @@ help:
 	@echo "... src/Filter.o"
 	@echo "... src/Filter.i"
 	@echo "... src/Filter.s"
+	@echo "... src/Operations.o"
+	@echo "... src/Operations.i"
+	@echo "... src/Operations.s"
 	@echo "... src/Visualizer.o"
 	@echo "... src/Visualizer.i"
 	@echo "... src/Visualizer.s"
