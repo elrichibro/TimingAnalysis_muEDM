@@ -36,6 +36,19 @@ int Configure(config_struct& value, const std::string& json_path) {
 
             value.io.tree_data_name = j.value("tree_data_name", value.io.tree_data_name);
             value.io.in_data_file = j.value("in_data_file", value.io.in_data_file);
+
+            value.io.columns.channel = j["columns"].value("channel", value.io.columns.channel);
+            value.io.columns.edge = j["columns"].value("edge", value.io.columns.edge);
+            value.io.columns.ToA = j["columns"].value("ToA", value.io.columns.ToA);
+            value.io.columns.ToT = j["columns"].value("ToT", value.io.columns.ToT);
+        }
+
+        if (json_obj.contains("efficiency")) {
+            const auto& j = json_obj["efficiency"];
+
+            value.efficiency.ref_channel = j.value("ref_channel", value.efficiency.ref_channel);
+            value.efficiency.eff_channel = j.value("eff_channel", value.efficiency.eff_channel);
+
         }
 
         if (json_obj.contains("analysis")) {
@@ -106,6 +119,42 @@ void Verbose_config(const config_struct& value) {
     std::cout << "I/O settings:" << std::endl;
     std::cout << "    Input data file: " << value.io.in_data_file << std::endl;
     std::cout << "    Data Tree: " << value.io.tree_data_name << std::endl;
+    std::cout << "    Tree column names: " << std::endl;
+    std::cout << "        Channel columns: " << value.io.columns.channel << std::endl;
+    std::cout << "        Edge columns: " << value.io.columns.edge << std::endl;
+    std::cout << "        ToA columns: " << value.io.columns.ToA << std::endl;
+    std::cout << "        ToT columns: " << value.io.columns.ToT << std::endl;
+    
+    std::cout << "" << std::endl;
+    std::cout << "--------------------------------------------------------------------" << std::endl;
+
+    // ----------
+    // Efficiency
+    // ----------
+
+    std::cout << "--------------------------------------------------------------------" << std::endl;
+    std::cout << "" << std::endl;
+
+    std::cout << "Efficiency setup:" << std::endl;
+    std::cout << "" << std::endl;
+
+    std::cout << "    Reference channels: {"; 
+    for(size_t i = 0; i < value.efficiency.ref_channel.size(); i++) {    
+        std::cout << value.efficiency.ref_channel[i];
+        if(i != (value.efficiency.ref_channel.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+    std::cout << "    Efficiency channels: {"; 
+    for(size_t i = 0; i < value.efficiency.eff_channel.size(); i++) {    
+        std::cout << value.efficiency.eff_channel[i];
+        if(i != (value.efficiency.eff_channel.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
     
     std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
@@ -225,8 +274,9 @@ void Verbose_config(const config_struct& value) {
     }
     std::cout << "}" << std::endl;
 
+    std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
-
+    
     // -----
     // Plots
     // -----
