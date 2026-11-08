@@ -165,3 +165,21 @@ int PlotTOA_MEAN(TCanvas* c_all, ROOT::RDF::RNode node, const std::vector<int>& 
 
     return 0;
 }
+
+
+
+int Plot_DeltaFirstToA(TCanvas* c_all, ROOT::RDF::RNode node, const first_ToA& f_ToA, const plot_config& plot) {
+    if (!c_all) return -1;
+    
+    c_all->cd();
+    c_all->Clear();
+
+    auto hist_deltaToA = node.Histo1D({"hist_deltaToA", plot.title.c_str(), plot.bins, plot.min, plot.max}, f_ToA.Delta);
+
+    hist_deltaToA->DrawClone(); 
+
+    c_all->Update();
+    
+    return 0;
+}
+
