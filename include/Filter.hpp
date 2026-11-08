@@ -9,9 +9,9 @@
 // STANDARD TEMPLATE LIBRARY
 #include <vector>
 
-ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const first_ToA& f_ToA);   
+ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const config_struct& cfg);   
 
-ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const std::vector<int>& channels);
+ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg);
 
 ROOT::RDF::RNode DefineTOA_mean_Node(ROOT::RDF::RNode node, const std::vector<int>& channels);
 

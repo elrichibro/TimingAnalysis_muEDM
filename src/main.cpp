@@ -10,7 +10,7 @@
 
 #include <TApplication.h>
 
-
+/*
 void analisi_TOT(int bins, double min, double max, const std::vector<int> channels) {
     TH1::AddDirectory(kFALSE);
 
@@ -37,7 +37,7 @@ void analisi_TOT(int bins, double min, double max, const std::vector<int> channe
     }
 }
 
-/*
+
 void analisi_TOA_MEAN(int bins ,double min, double max, const std::vector<int> channels) {
     TH1::AddDirectory(kFALSE);
 
@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
         ROOT::RDataFrame data_frame(cfg.io.tree_data_name, cfg.io.in_data_file);
         ROOT::RDF::RNode node_DeltaToA = data_frame;
 
-        node_DeltaToA = FirstToA_Node(node_DeltaToA, cfg.analysis.f_ToA);
+        node_DeltaToA = FirstToA_Node(node_DeltaToA, cfg);
         node_DeltaToA = CalculateDelta_FirstToA(node_DeltaToA, cfg.analysis.f_ToA);
         
         
