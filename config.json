@@ -1,6 +1,6 @@
 {
     "general": { 
-        "operation_mode":"DeltaToA",
+        "operation_mode":"efficiency",
         "verbose": 1,
         "visualize":true
     },
@@ -17,10 +17,13 @@
     },
   
     "efficiency": {
-        "ref_channel":[2, 4, 20, 22], 
-        "eff_channel":[3, 5, 23, 25],
-        "Events":{
-
+        "gate_channel":[2, 4, 20, 22], 
+        "tof_channel":[3, 5, 23, 25],
+        "trigger_channel":62,
+        "event":{
+            "hits":[0, 1, 2, 3, 4],
+            "gate_column": "Gate_Hits",
+            "tof_column": "ToF_Hits"
         }
     },
 
@@ -53,6 +56,12 @@
             "min": -10.0,
             "max":2.0,
             "title":"Delta between first ToA;GATE[0]-TOF[0];Events"
+        },
+        "plot_hits":{
+            "bins": 5,
+            "min": -0.5,
+            "max":4.5,
+            "title":"Number of hits;Number of hits;Events"
         }
     }
 }

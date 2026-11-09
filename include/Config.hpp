@@ -24,12 +24,16 @@ struct io_config {
 };
 
 struct events_config {
-
+    std::vector<int> hits;
+    std::string gate_column = " ";
+    std::string tof_column = " ";
 };
 
 struct efficiency_config {
-    std::vector<int> ref_channel;
-    std::vector<int> eff_channel;
+    std::vector<int> gate_channel;
+    std::vector<int> tof_channel;
+    int trigger_channel = -1;
+    events_config event;
 };
 
 struct delta_ToA {
@@ -67,6 +71,7 @@ struct plot_config {
 
 struct canvas_config {
     plot_config plot_delta_ToA;
+    plot_config plot_hits;
 };
 
 struct config_struct {

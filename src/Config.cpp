@@ -46,9 +46,14 @@ int Configure(config_struct& value, const std::string& json_path) {
         if (json_obj.contains("efficiency")) {
             const auto& j = json_obj["efficiency"];
 
-            value.efficiency.ref_channel = j.value("ref_channel", value.efficiency.ref_channel);
-            value.efficiency.eff_channel = j.value("eff_channel", value.efficiency.eff_channel);
+            value.efficiency.gate_channel = j.value("gate_channel", value.efficiency.gate_channel);
+            value.efficiency.tof_channel = j.value("tof_channel", value.efficiency.tof_channel);
+            value.efficiency.trigger_channel = j.value("trigger_channel", value.efficiency.trigger_channel);
 
+            value.efficiency.event.hits = j["event"].value("hits", value.efficiency.event.hits);
+
+            value.efficiency.event.gate_column = j["event"].value("gate_column", value.efficiency.event.gate_column);
+            value.efficiency.event.tof_column = j["event"].value("tof_column", value.efficiency.event.tof_column);
         }
 
         if (json_obj.contains("analysis")) {
@@ -78,6 +83,11 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.canvas.plot_delta_ToA.min = j["plot_delta_ToA"].value("min", value.canvas.plot_delta_ToA.min);
             value.canvas.plot_delta_ToA.max = j["plot_delta_ToA"].value("max", value.canvas.plot_delta_ToA.max);
             value.canvas.plot_delta_ToA.title = j["plot_delta_ToA"].value("title", value.canvas.plot_delta_ToA.title);
+
+            value.canvas.plot_hits.bins = j["plot_hits"].value("bins", value.canvas.plot_hits.bins);
+            value.canvas.plot_hits.min = j["plot_hits"].value("min", value.canvas.plot_hits.min);
+            value.canvas.plot_hits.max = j["plot_hits"].value("max", value.canvas.plot_hits.max);
+            value.canvas.plot_hits.title = j["plot_hits"].value("title", value.canvas.plot_hits.title);
         }
     } catch (const std::exception& except) {
         std::cout << "ERROR: " << except.what() << std::endl;
@@ -138,24 +148,38 @@ void Verbose_config(const config_struct& value) {
     std::cout << "Efficiency setup:" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << "    Reference channels: {"; 
-    for(size_t i = 0; i < value.efficiency.ref_channel.size(); i++) {    
-        std::cout << value.efficiency.ref_channel[i];
-        if(i != (value.efficiency.ref_channel.size() - 1)) {
+    std::cout << "    Gate channels: {"; 
+    for(size_t i = 0; i < value.efficiency.gate_channel.size(); i++) {    
+        std::cout << value.efficiency.gate_channel[i];
+        if(i != (value.efficiency.gate_channel.size() - 1)) {
             std::cout << ", ";
         }
     }
     std::cout << "}" << std::endl;
 
-    std::cout << "    Efficiency channels: {"; 
-    for(size_t i = 0; i < value.efficiency.eff_channel.size(); i++) {    
-        std::cout << value.efficiency.eff_channel[i];
-        if(i != (value.efficiency.eff_channel.size() - 1)) {
+    std::cout << "    ToF channels: {"; 
+    for(size_t i = 0; i < value.efficiency.tof_channel.size(); i++) {    
+        std::cout << value.efficiency.tof_channel[i];
+        if(i != (value.efficiency.tof_channel.size() - 1)) {
             std::cout << ", ";
         }
     }
     std::cout << "}" << std::endl;
-    
+
+    std::cout << "    Trigger channel: " << value.efficiency.trigger_channel << std::endl;
+
+    std::cout << "    Event: " << std::endl;
+    std::cout << "        Hits: {"; 
+    for(size_t i = 0; i < value.efficiency.event.hits.size(); i++) {    
+        std::cout << value.efficiency.event.hits[i];
+        if(i != (value.efficiency.event.hits.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+    std::cout << "        Gate column: " << value.efficiency.event.gate_column << std::endl;
+    std::cout << "        ToF column: " << value.efficiency.event.tof_column << std::endl; 
+
     std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
 
@@ -293,6 +317,12 @@ void Verbose_config(const config_struct& value) {
     std::cout << "        Plot min bin value: " << value.canvas.plot_delta_ToA.min << std::endl;
     std::cout << "        Plot max bin value: " << value.canvas.plot_delta_ToA.max << std::endl;
     std::cout << "        Plot title: " << value.canvas.plot_delta_ToA.title << std::endl;
+
+    std::cout << "    Plot Hits histogram: " << std::endl;
+    std::cout << "        Plot bin value: " << value.canvas.plot_hits.bins << std::endl;
+    std::cout << "        Plot min bin value: " << value.canvas.plot_hits.min << std::endl;
+    std::cout << "        Plot max bin value: " << value.canvas.plot_hits.max << std::endl;
+    std::cout << "        Plot title: " << value.canvas.plot_hits.title << std::endl;
 
     std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
