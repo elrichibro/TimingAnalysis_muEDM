@@ -89,6 +89,8 @@ int main(int argc, char* argv[]) {
 
     config_struct cfg;
     std::string json_path = "";
+    std::vector<double> gate_hits;
+    std::vector<double> tof_hits;    
     
     int verbose = 0;
     bool visualize = false;
@@ -141,27 +143,95 @@ int main(int argc, char* argv[]) {
         app = new TApplication("app", &argc, argv);
     }
 
+    ROOT::RDataFrame data_frame(cfg.io.tree_data_name, cfg.io.in_data_file);
+
     // ---------
     // Delta ToA
     // ---------
 
-
-    TCanvas* c_DeltaToA = new TCanvas("c_DeltaToA", "DeltaToA", 800, 600);
-
     if (cfg.general.operation_mode.find("DeltaToA") != std::string::npos) {
-        ROOT::RDataFrame data_frame(cfg.io.tree_data_name, cfg.io.in_data_file);
         ROOT::RDF::RNode node_DeltaToA = data_frame;
 
         node_DeltaToA = FirstToA_Node(node_DeltaToA, cfg);
         node_DeltaToA = CalculateDelta_FirstToA(node_DeltaToA, cfg.analysis.f_ToA);
         
-        
+        TCanvas* c_DeltaToA = new TCanvas("c_DeltaToA", "DeltaToA", 800, 600);
         int ret = Plot_DeltaFirstToA(c_DeltaToA, node_DeltaToA, cfg.analysis.f_ToA, cfg.canvas.plot_delta_ToA);
 
         app->Run();
             
         delete app;
         app = nullptr; 
+    
+    } else if(cfg.general.operation_mode.find("efficiency") != std::string::npos) {
+        ROOT::RDF::RNode node_Hits = data_frame;
+
+        std::string edge_mask = cfg.io.columns.edge + "== 1";
+        std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]";
+        
+        node_Hits = node_Hits
+            .Define("Mask_Lead", edge_mask.c_str())
+            .Define("Ch_Lead", channel_mask.c_str())
+            .Filter("Any(Ch_Lead == 62)", "Triggered Event");
+
+        auto cut_report = node_Hits.Report();
+        
+        node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.gate_channel, cfg.efficiency.event.gate_column);
+        node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.tof_channel, cfg.efficiency.event.tof_column);
+
+        auto plot = cfg.canvas.plot_hits;
+        auto hist_hits_gate = node_Hits.Histo1D({"hist_hits_gate", plot.title.c_str(), plot.bins, plot.min, plot.max}, cfg.efficiency.event.gate_column);
+        auto hist_hits_tof = node_Hits.Histo1D({"hist_hits_tof", plot.title.c_str(), plot.bins, plot.min, plot.max}, cfg.efficiency.event.tof_column);
+        
+        auto h_map = node_Hits.Histo2D({"h_map", "Gate vs ToF;Gate Hits;ToF Hits", plot.bins, plot.min, plot.max, plot.bins, plot.min, plot.max},
+             cfg.efficiency.event.gate_column, cfg.efficiency.event.tof_column);
+
+        cut_report->Print();
+
+        TH1D* h_gate = hist_hits_gate.GetPtr();
+        double total_gate_events = h_gate->GetEntries();
+        
+        std::cout << "-------------------------------------------------" << std::endl;
+
+        for(size_t k = 0; k < cfg.efficiency.gate_channel.size() + 1; k++) {
+            double hit = h_gate->GetBinContent(k + 1);
+            gate_hits.push_back(hit);
+            std::cout << "Gate Efficiency for " << k << " hits: " << hit/total_gate_events << std::endl;
+        }
+
+        std::cout << "-------------------------------------------------" << std::endl;
+
+        TH1D* h_tof = hist_hits_tof.GetPtr();
+        double total_tof_events = h_tof->GetEntries();
+        for(size_t k = 0; k < cfg.efficiency.gate_channel.size() + 1; k++) {
+            double hit = h_tof->GetBinContent(k + 1);
+            tof_hits.push_back(hit);
+            std::cout << "ToF Efficiency for " << k << " hits: " << hit/total_tof_events << std::endl;
+        }
+
+        std::cout << "-------------------------------------------------" << std::endl;
+
+        if(visualize) {
+            TCanvas* c_Gate = new TCanvas("c_Gate", "Hits Gate", 800, 600);
+            c_Gate->cd();
+            hist_hits_gate->Draw();
+            c_Gate->Update();
+
+            TCanvas* c_ToF = new TCanvas("c_ToF", "Hits ToF", 800, 600);
+            c_ToF->cd();
+            hist_hits_tof->Draw();
+            c_ToF->Update();
+
+            TCanvas* c_cov = new TCanvas("c_cov", "Hits Gate vs ToF", 800, 600);
+            c_cov->cd();
+            h_map->Draw("COLZ TEXT");
+            c_cov->Update();
+
+            app->Run();
+
+            delete app;
+            app = nullptr;
+        }
     } else {
         printf("ERROR: invalid operation mode, exiting...");
     }
