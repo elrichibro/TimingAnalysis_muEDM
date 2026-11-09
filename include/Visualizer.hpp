@@ -17,4 +17,5 @@ int PlotTOA_MEAN(TCanvas* c_all, ROOT::RDF::RNode node, const std::vector<int>& 
 
 int Plot_DeltaFirstToA(TCanvas* c_all, ROOT::RDF::RNode node, const first_ToA& f_ToA, const plot_config& plot);
 
+int Plot_Hits(TCanvas* c_all, ROOT::RDF::RNode node, const config_struct& cfg, const std::string& column);
 #endif

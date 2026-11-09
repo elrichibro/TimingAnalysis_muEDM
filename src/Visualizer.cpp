@@ -183,3 +183,18 @@ int Plot_DeltaFirstToA(TCanvas* c_all, ROOT::RDF::RNode node, const first_ToA& f
     return 0;
 }
 
+int Plot_Hits(TCanvas* c_all, ROOT::RDF::RNode node, const config_struct& cfg, const std::string& column) {
+    if (!c_all) return -1;
+    
+    c_all->cd();
+    c_all->Clear();
+
+    auto plot = cfg.canvas.plot_hits;
+    auto hist_hits = node.Histo1D({"hist_hits", plot.title.c_str(), plot.bins, plot.min, plot.max}, column);
+
+    hist_hits->DrawClone(); 
+
+    c_all->Update();
+    
+    return 0;
+}
