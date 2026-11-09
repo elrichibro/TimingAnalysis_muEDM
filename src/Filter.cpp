@@ -6,6 +6,38 @@
 
 #include <TH1D.h>
 
+ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, const std::vector<int> channels, const std::string& out_column) {
+    auto hits = cfg.efficiency.event.hits;
+
+    auto count_hits = [channels](const ROOT::RVec<unsigned char>& ch) -> int {    
+        int hit_count = 0;
+        int current_channel = -1;
+
+        for (size_t i = 0; i < ch.size(); i++) {
+            if(ch[i] == current_channel) {
+                continue;
+            }
+            current_channel = ch[i];
+            
+            bool is_in_list = std::find(channels.begin(), channels.end(), ch[i]) != channels.end();
+
+            if (is_in_list) {
+                hit_count++;
+            }
+        }
+        return hit_count; 
+    };
+    
+    node = node.Define(out_column, count_hits, {"Ch_Lead"});
+
+    return node;
+}
+
+
+
+
+
+
 // ------------------------------------------------
 // FIRST OF EVENT   
 // ------------------------------------------------
