@@ -4,11 +4,19 @@
 #include <string>
 #include <vector>
 
+// -------
+// General
+// -------
+
 struct general_config {
     std::string operation_mode = "";
     int verbose = 0;
     bool visualize = false;
 };
+
+// ---
+// I/O
+// ---
 
 struct columns_config {
     std::string channel = "";
@@ -20,7 +28,25 @@ struct columns_config {
 struct io_config {
     std::string tree_data_name = "";
     std::string in_data_file = "";
+    bool all_dataset = false;
+    int dataset_min;
+    int dataset_max;
     columns_config columns;
+};
+
+// ----------
+// Efficiency
+// ----------
+
+struct channels {
+    std::vector<int> gate_channel;
+    std::vector<int> tof_channel;
+    int trigger_channel = -1;
+};
+
+struct hits_channel {
+    std::string detector = "";
+    std::string column_name = "";
 };
 
 struct events_config {
@@ -31,11 +57,15 @@ struct events_config {
 };
 
 struct efficiency_config {
-    std::vector<int> gate_channel;
-    std::vector<int> tof_channel;
-    int trigger_channel = -1;
+    std::string eff_mode = "";
+    hits_channel hits_ch;
+    channels ch;
     events_config event;
 };
+
+// --------
+// Analysis
+// --------
 
 struct delta_ToA {
     std::string ToA1 = "";
@@ -64,6 +94,10 @@ struct analysis_config {
     first_ToA f_ToA;
     first_ToT ToT;
 };
+
+// ------
+// Canvas
+// ------
 
 struct plot_config {
     int bins;

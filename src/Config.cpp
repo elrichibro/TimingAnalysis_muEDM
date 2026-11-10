@@ -36,6 +36,10 @@ int Configure(config_struct& value, const std::string& json_path) {
 
             value.io.tree_data_name = j.value("tree_data_name", value.io.tree_data_name);
             value.io.in_data_file = j.value("in_data_file", value.io.in_data_file);
+            
+            value.io.all_dataset = j.value("all_dataset", value.io.all_dataset);
+            value.io.dataset_min = j.value("dataset_min", value.io.dataset_min);
+            value.io.dataset_max = j.value("dataset_max", value.io.dataset_max);
 
             value.io.columns.channel = j["columns"].value("channel", value.io.columns.channel);
             value.io.columns.edge = j["columns"].value("edge", value.io.columns.edge);
@@ -46,9 +50,13 @@ int Configure(config_struct& value, const std::string& json_path) {
         if (json_obj.contains("efficiency")) {
             const auto& j = json_obj["efficiency"];
 
-            value.efficiency.gate_channel = j.value("gate_channel", value.efficiency.gate_channel);
-            value.efficiency.tof_channel = j.value("tof_channel", value.efficiency.tof_channel);
-            value.efficiency.trigger_channel = j.value("trigger_channel", value.efficiency.trigger_channel);
+            value.efficiency.eff_mode = j.value("eff_mode", value.efficiency.eff_mode);
+            value.efficiency.hits_ch.detector = j["hits_ch"].value("detector", value.efficiency.hits_ch.detector);
+            value.efficiency.hits_ch.column_name = j["hits_ch"].value("column_name", value.efficiency.hits_ch.column_name);
+
+            value.efficiency.ch.gate_channel = j["ch"].value("gate_channel", value.efficiency.ch.gate_channel);
+            value.efficiency.ch.tof_channel = j["ch"].value("tof_channel", value.efficiency.ch.tof_channel);
+            value.efficiency.ch.trigger_channel = j["ch"].value("trigger_channel", value.efficiency.ch.trigger_channel);
 
             value.efficiency.event.channel_hits = j["event"].value("channel_hits", value.efficiency.event.channel_hits);
             value.efficiency.event.hits = j["event"].value("hits", value.efficiency.event.hits);
@@ -136,6 +144,11 @@ void Verbose_config(const config_struct& value) {
     std::cout << "I/O settings:" << std::endl;
     std::cout << "    Input data file: " << value.io.in_data_file << std::endl;
     std::cout << "    Data Tree: " << value.io.tree_data_name << std::endl;
+
+    std::cout << "    All dataset flag: " << value.io.all_dataset << std::endl;
+    std::cout << "    Dataset min: " << value.io.dataset_min << std::endl;
+    std::cout << "    Dataset max: " << value.io.dataset_max << std::endl;
+
     std::cout << "    Tree column names: " << std::endl;
     std::cout << "        Channel columns: " << value.io.columns.channel << std::endl;
     std::cout << "        Edge columns: " << value.io.columns.edge << std::endl;
@@ -152,28 +165,36 @@ void Verbose_config(const config_struct& value) {
     std::cout << "--------------------------------------------------------------------" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << "Efficiency setup:" << std::endl;
+    std::cout << "Efficiency:" << std::endl;
     std::cout << "" << std::endl;
 
-    std::cout << "    Gate channels: {"; 
-    for(size_t i = 0; i < value.efficiency.gate_channel.size(); i++) {    
-        std::cout << value.efficiency.gate_channel[i];
-        if(i != (value.efficiency.gate_channel.size() - 1)) {
+    std::cout << "    Efficiency mode: " << value.efficiency.eff_mode << std::endl;
+
+    std::cout << "    Hits_channel mode: " << std::endl;
+    std::cout << "        Detector: " << value.efficiency.hits_ch.detector << std::endl;
+    std::cout << "        Column name: " << value.efficiency.hits_ch.column_name << std::endl;
+    
+
+    std::cout << "    Channels: " << std::endl;
+    std::cout << "        Gate channels: {"; 
+    for(size_t i = 0; i < value.efficiency.ch.gate_channel.size(); i++) {    
+        std::cout << value.efficiency.ch.gate_channel[i];
+        if(i != (value.efficiency.ch.gate_channel.size() - 1)) {
             std::cout << ", ";
         }
     }
     std::cout << "}" << std::endl;
 
-    std::cout << "    ToF channels: {"; 
-    for(size_t i = 0; i < value.efficiency.tof_channel.size(); i++) {    
-        std::cout << value.efficiency.tof_channel[i];
-        if(i != (value.efficiency.tof_channel.size() - 1)) {
+    std::cout << "        ToF channels: {"; 
+    for(size_t i = 0; i < value.efficiency.ch.tof_channel.size(); i++) {    
+        std::cout << value.efficiency.ch.tof_channel[i];
+        if(i != (value.efficiency.ch.tof_channel.size() - 1)) {
             std::cout << ", ";
         }
     }
     std::cout << "}" << std::endl;
 
-    std::cout << "    Trigger channel: " << value.efficiency.trigger_channel << std::endl;
+    std::cout << "        Trigger channel: " << value.efficiency.ch.trigger_channel << std::endl;
 
     std::cout << "    Event: " << std::endl;
     std::cout << "        Channel hits flag: " << value.efficiency.event.channel_hits << std::endl;
