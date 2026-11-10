@@ -1,6 +1,6 @@
 {
     "general": { 
-        "operation_mode":"ToT",
+        "operation_mode":"Efficiency",
         "verbose": 1,
         "visualize":true
     },
@@ -8,6 +8,9 @@
     "io": {
         "tree_data_name":"Event",
         "in_data_file":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root",
+        "all_dataset" : true,
+        "dataset_min": 1584, 
+        "dataset_max": 1711, 
         "columns":{
             "channel":"FD01_channel",
             "edge":"FD01_edge",
@@ -17,9 +20,18 @@
     },
   
     "efficiency": {
-        "gate_channel":[2, 4, 20, 22], 
-        "tof_channel":[3, 5, 23, 25],
-        "trigger_channel":62,
+        "eff_mode":"hits_ch",
+        "hits_ch":{
+            "detector": "gate",
+            "column_name": "Gate_Hits"
+        },
+
+        "ch": {
+            "gate_channel":[2, 4, 20, 22], 
+            "tof_channel":[3, 5, 23, 25],
+            "trigger_channel":62
+        },
+
         "event":{
             "channel_hits":true,
             "hits":[0, 1, 2, 3, 4],

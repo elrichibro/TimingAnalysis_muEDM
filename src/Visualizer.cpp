@@ -121,16 +121,35 @@ int Plot_ToT(TCanvas* c_all, ROOT::RDF::RNode node, const config_struct& cfg, co
     return 0;
 }
 
-int Plot_Hits(TCanvas* c_all, ROOT::RDF::RNode node, const config_struct& cfg, const std::string& column) {
-    if (!c_all) return -1;
-    
+int Plot_Hits(TCanvas* c_all, ROOT::RDF::RNode node, const config_struct& cfg, const std::string& column, const std::vector<int>& channels) {
+    if (!c_all) {
+        return -1;
+    }
+
     c_all->cd();
     c_all->Clear();
 
     auto plot = cfg.canvas.plot_hits;
-    auto hist_hits = node.Histo1D({"hist_hits", plot.title.c_str(), plot.bins, plot.min, plot.max}, column);
 
-    hist_hits->DrawClone(); 
+    std::string x_col = column + "_Hitted";
+    std::string y_col = column;
+
+    int n_channels = channels.size();
+
+    std::string title = cfg.canvas.plot_hits.title;
+
+    auto h2_hits = node.Histo2D<ROOT::RVec<int>, int>(
+        {"h2_hits", title.c_str(), 
+        n_channels, 0.0, (double)n_channels,
+        plot.bins, plot.min, plot.max},
+        x_col, y_col);
+
+    for (int i = 0; i < n_channels; i++) {
+        std::string label = "Ch " + std::to_string(channels[i]);
+        h2_hits->GetXaxis()->SetBinLabel(i + 1, label.c_str());
+    }
+
+    h2_hits->DrawClone("COLZ TEXT"); 
 
     c_all->Update();
     

@@ -5,9 +5,8 @@
 #include <string>
 
 #include <TH1D.h>
-
+/*
 ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, const std::vector<int> channels, const std::string& out_column) {
-
     if(!cfg.efficiency.event.channel_hits) {
         auto count_hits_only = [channels] (const ROOT::RVec<unsigned char>& ch) -> int {
             int hit_count = 0;
@@ -69,6 +68,45 @@ ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, cons
             return res[k + 1]; 
         }, {"Hits_Results"});
     }
+
+    return node;
+}
+*/
+
+ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, const std::vector<int> channels, const std::string& out_column) {
+    auto get_channels = [channels] (const ROOT::RVec<unsigned char>& ch) -> ROOT::RVec<int> {
+        ROOT::RVec<int> hitted_channels;
+        int current_channel = -1;
+
+        for (size_t i = 0; i < ch.size(); i++) {
+            int ch_val = static_cast<int>(ch[i]);
+            
+            if (ch_val == current_channel) {
+                continue;
+            }
+            
+            current_channel = ch_val;
+
+            auto it = std::find(channels.begin(), channels.end(), ch_val);
+            
+            if (it != channels.end()) {
+                int index = std::distance(channels.begin(), it);
+
+                if (std::find(hitted_channels.begin(), hitted_channels.end(), index) == hitted_channels.end()) {
+                    hitted_channels.push_back(index);
+                }
+            }
+        }
+        return hitted_channels;
+    };
+
+    std::string hitted_column = out_column + "_Hitted";
+    
+    node = node.Define(hitted_column, get_channels, {"Ch_Lead"});
+
+    node = node.Define(out_column, [](const ROOT::RVec<int>& fired) { 
+        return static_cast<int>(fired.size()); 
+    }, {hitted_column});
 
     return node;
 }
