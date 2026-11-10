@@ -7,33 +7,71 @@
 #include <TH1D.h>
 
 ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, const std::vector<int> channels, const std::string& out_column) {
-    auto hits = cfg.efficiency.event.hits;
 
-    auto count_hits = [channels](const ROOT::RVec<unsigned char>& ch) -> int {    
+    if(!cfg.efficiency.event.channel_hits) {
+        auto count_hits_only = [channels] (const ROOT::RVec<unsigned char>& ch) -> int {
+            int hit_count = 0;
+            int current_channel = -1;
+
+            for (size_t i = 0; i < ch.size(); i++) {
+                int ch_val = static_cast<int>(ch[i]);
+                
+                if (ch_val == current_channel) {
+                    continue;
+                }
+                
+                current_channel = ch_val;
+
+                if (std::find(channels.begin(), channels.end(), ch_val) != channels.end()) {
+                    hit_count++;
+                }
+            }
+            return hit_count;
+        };
+
+        return node.Define(out_column, count_hits_only, {"Ch_Lead"});
+    }
+
+    auto process_full_event = [channels] (const ROOT::RVec<unsigned char>& ch) -> ROOT::RVec<int> {
+        ROOT::RVec<int> result(channels.size() + 1, 0); 
+        
         int hit_count = 0;
         int current_channel = -1;
 
         for (size_t i = 0; i < ch.size(); i++) {
-            if(ch[i] == current_channel) {
+            int ch_val = static_cast<int>(ch[i]);
+           
+            if (ch_val == current_channel) {
                 continue;
             }
-            current_channel = ch[i];
-            
-            bool is_in_list = std::find(channels.begin(), channels.end(), ch[i]) != channels.end();
+            current_channel = ch_val;
 
-            if (is_in_list) {
+            auto it = std::find(channels.begin(), channels.end(), ch_val);
+            
+            if (it != channels.end()) {
                 hit_count++;
+                size_t ch_idx = std::distance(channels.begin(), it);
+                result[ch_idx + 1] = 1;
             }
         }
-        return hit_count; 
+        
+        result[0] = hit_count;
+        return result;
     };
-    
-    node = node.Define(out_column, count_hits, {"Ch_Lead"});
+
+    node = node.Define("Hits_Results", process_full_event, {"Ch_Lead"});
+    node = node.Define(out_column, [](const ROOT::RVec<int>& res) { return res[0]; }, {"Hits_Results"});
+
+    for (size_t k = 0; k < channels.size(); k++) {
+        std::string col_ch_hit = out_column + "_Ch" + std::to_string(channels[k]) + "_Hit";
+        
+        node = node.Define(col_ch_hit, [k](const ROOT::RVec<int>& res) { 
+            return res[k + 1]; 
+        }, {"Hits_Results"});
+    }
 
     return node;
 }
-
-
 
 
 
@@ -112,6 +150,8 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const config_struct& cfg) 
 ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg) {
     auto ToT = cfg.analysis.ToT;
     auto Column = cfg.io.columns;
+
+    bool condition = cfg.analysis.ToT.first;
     
     auto calc_TOT = [](const ROOT::RVec<double>& time, const ROOT::RVec<uint8_t>& edge) {
         ROOT::RVec<double> tot;
@@ -129,11 +169,11 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg)
         return tot;
     };
 
-
     std::vector<std::vector<int>> channels = cfg.analysis.ToT.channels;
     std::string ToA_column =  cfg.io.columns.ToA + "* 3.125/1000";
     
-    node = node.Define("ToA_ns", ToA_column.c_str());
+    // Changing clock scale to ns scale
+    //node = node.Define("ToA_ns", ToA_column.c_str());
 
     for (size_t i = 0; i < channels.size(); i++) {
         if(channels[i].size() != ToT.ToT_list[i].size()) {
@@ -145,16 +185,25 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg)
             std::string ch = std::to_string(channels[i][j]);
             std::string tot_col = ToT.ToT_list[i][j];
 
-            std::string channel_column = Column.channel + ch;
+            std::string channel_column = Column.channel + "==" + ch;
             std::string edge_column = Column.edge + "[Mask_Ch" + ch + "]";
 
             node = node
                 .Define("Mask_Ch" + ch, channel_column.c_str())
                 
-                .Define("ToA_Ch" + ch, "ToA_ns[Mask_Ch" + ch + "]")
+                .Define("ToA_Ch" + ch, "FD01_ToA[Mask_Ch" + ch + "]")
                 .Define("Edge_Ch" + ch, edge_column.c_str())
                 
                 .Define(tot_col, calc_TOT, {"ToA_Ch" + ch, "Edge_Ch" + ch});
+
+            if(condition) {
+                node = node.Define(cfg.analysis.ToT.ToT_first[i][j], [](const ROOT::RVec<double>& tot) -> double {
+                    if (tot.empty()) {
+                        return -999.0;
+                    }
+                    return tot[0];
+                }, {tot_col});            
+            }
         }
     }
 
