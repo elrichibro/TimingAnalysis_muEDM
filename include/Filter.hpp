@@ -10,7 +10,6 @@
 #include <vector>
 
 // Efficiency Node
-
 ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, const std::vector<int> channels, const std::string& out_column);   
 
 
