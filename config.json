@@ -1,6 +1,6 @@
 {
     "general": { 
-        "operation_mode":"efficiency",
+        "operation_mode":"ToT",
         "verbose": 1,
         "visualize":true
     },
@@ -21,6 +21,7 @@
         "tof_channel":[3, 5, 23, 25],
         "trigger_channel":62,
         "event":{
+            "channel_hits":true,
             "hits":[0, 1, 2, 3, 4],
             "gate_column": "Gate_Hits",
             "tof_column": "ToF_Hits"
@@ -44,9 +45,11 @@
         },
 
         "ToT":{
-            "channels":[[2, 4, 20, 22], [3, 5, 23, 25]],
-            "ToT_list":[["ToT1", "ToT2", "ToT3", "ToT4"], ["ToT9", "ToT10", "ToT11", "ToT12"]],
-            "ToT_first": ["ToT_GATE", "ToT_TOF"]
+            "channels":[[2, 4, 20, 22], [3, 5, 23, 25], [62]],
+            "ToT_list":[["ToT1", "ToT2", "ToT3", "ToT4"], ["ToT9", "ToT10", "ToT11", "ToT12"], ["ToT_Trg"]],
+            "first":true,
+            "ToT_first": [["ToT_Ch1", "ToT_Ch2", "ToT_Ch3", "ToT_Ch4"], ["ToT_Ch9", "ToT_Ch10", "ToT_Ch11", "ToT_Ch12"], ["ToT_Trigger"]],
+            "ToT_first_ToA": ["ToT_GATE", "ToT_TOF", "ToT_Trigger"]
         }
     },
 
@@ -56,6 +59,12 @@
             "min": -10.0,
             "max":2.0,
             "title":"Delta between first ToA;GATE[0]-TOF[0];Events"
+        },
+        "plot_ToT":{
+            "bins": 50,
+            "min": 19.1,
+            "max": 19.6,
+            "title":"ToT first hit;ToT [ns];Events"
         },
         "plot_hits":{
             "bins": 5,

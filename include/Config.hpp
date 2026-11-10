@@ -24,6 +24,7 @@ struct io_config {
 };
 
 struct events_config {
+    bool channel_hits = false;
     std::vector<int> hits;
     std::string gate_column = " ";
     std::string tof_column = " ";
@@ -51,7 +52,9 @@ struct first_ToA {
 struct first_ToT {
     std::vector<std::vector<int>> channels;
     std::vector<std::vector<std::string>> ToT_list;
-    std::vector<std::string> ToT_first;
+    bool first = false;
+    std::vector<std::vector<std::string>> ToT_first;
+    std::vector<std::string> ToT_first_ToA;
 };
 
 struct analysis_config {
@@ -71,6 +74,7 @@ struct plot_config {
 
 struct canvas_config {
     plot_config plot_delta_ToA;
+    plot_config plot_ToT;
     plot_config plot_hits;
 };
 

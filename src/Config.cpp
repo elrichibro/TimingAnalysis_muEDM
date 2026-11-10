@@ -50,8 +50,8 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.efficiency.tof_channel = j.value("tof_channel", value.efficiency.tof_channel);
             value.efficiency.trigger_channel = j.value("trigger_channel", value.efficiency.trigger_channel);
 
+            value.efficiency.event.channel_hits = j["event"].value("channel_hits", value.efficiency.event.channel_hits);
             value.efficiency.event.hits = j["event"].value("hits", value.efficiency.event.hits);
-
             value.efficiency.event.gate_column = j["event"].value("gate_column", value.efficiency.event.gate_column);
             value.efficiency.event.tof_column = j["event"].value("tof_column", value.efficiency.event.tof_column);
         }
@@ -73,7 +73,9 @@ int Configure(config_struct& value, const std::string& json_path) {
         
             value.analysis.ToT.channels = j["ToT"].value("channels", value.analysis.ToT.channels);
             value.analysis.ToT.ToT_list = j["ToT"].value("ToT_list", value.analysis.ToT.ToT_list);
+            value.analysis.ToT.first = j["ToT"].value("first", value.analysis.ToT.first);
             value.analysis.ToT.ToT_first = j["ToT"].value("ToT_first", value.analysis.ToT.ToT_first);
+            value.analysis.ToT.ToT_first_ToA = j["ToT"].value("ToT_first_ToA", value.analysis.ToT.ToT_first_ToA);
         }
 
         if (json_obj.contains("canvas")) {
@@ -83,6 +85,11 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.canvas.plot_delta_ToA.min = j["plot_delta_ToA"].value("min", value.canvas.plot_delta_ToA.min);
             value.canvas.plot_delta_ToA.max = j["plot_delta_ToA"].value("max", value.canvas.plot_delta_ToA.max);
             value.canvas.plot_delta_ToA.title = j["plot_delta_ToA"].value("title", value.canvas.plot_delta_ToA.title);
+
+            value.canvas.plot_ToT.bins = j["plot_ToT"].value("bins", value.canvas.plot_ToT.bins);
+            value.canvas.plot_ToT.min = j["plot_ToT"].value("min", value.canvas.plot_ToT.min);
+            value.canvas.plot_ToT.max = j["plot_ToT"].value("max", value.canvas.plot_ToT.max);
+            value.canvas.plot_ToT.title = j["plot_ToT"].value("title", value.canvas.plot_ToT.title);
 
             value.canvas.plot_hits.bins = j["plot_hits"].value("bins", value.canvas.plot_hits.bins);
             value.canvas.plot_hits.min = j["plot_hits"].value("min", value.canvas.plot_hits.min);
@@ -169,6 +176,7 @@ void Verbose_config(const config_struct& value) {
     std::cout << "    Trigger channel: " << value.efficiency.trigger_channel << std::endl;
 
     std::cout << "    Event: " << std::endl;
+    std::cout << "        Channel hits flag: " << value.efficiency.event.channel_hits << std::endl;
     std::cout << "        Hits: {"; 
     for(size_t i = 0; i < value.efficiency.event.hits.size(); i++) {    
         std::cout << value.efficiency.event.hits[i];
@@ -288,11 +296,28 @@ void Verbose_config(const config_struct& value) {
     }
     std::cout << std::endl;
 
-    std::cout << "        ToT first: {";
+    std::cout << "        ToT first option: " << value.analysis.ToT.first << std::endl;
+
+    std::cout << "        ToT first: ";
     for(size_t i = 0; i < value.analysis.ToT.ToT_first.size(); i++) {
-        std::cout << value.analysis.ToT.ToT_first[i];
+        std::cout << "{";
         
-        if(i != (value.analysis.ToT.ToT_first.size() - 1)) {
+        for (size_t j = 0; j < value.analysis.ToT.ToT_first[i].size(); j++) {
+            std::cout << value.analysis.ToT.ToT_first[i][j];
+            
+            if(j != (value.analysis.ToT.ToT_first[i].size() - 1)) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}";
+    }
+    std::cout << std::endl;
+
+    std::cout << "        ToT first ToA: {";
+    for(size_t i = 0; i < value.analysis.ToT.ToT_first_ToA.size(); i++) {
+        std::cout << value.analysis.ToT.ToT_first_ToA[i];
+        
+        if(i != (value.analysis.ToT.ToT_first_ToA.size() - 1)) {
             std::cout << ", ";
         }
     }
@@ -317,6 +342,12 @@ void Verbose_config(const config_struct& value) {
     std::cout << "        Plot min bin value: " << value.canvas.plot_delta_ToA.min << std::endl;
     std::cout << "        Plot max bin value: " << value.canvas.plot_delta_ToA.max << std::endl;
     std::cout << "        Plot title: " << value.canvas.plot_delta_ToA.title << std::endl;
+
+    std::cout << "    Plot ToT histogram: " << std::endl;
+    std::cout << "        Plot bin value: " << value.canvas.plot_ToT.bins << std::endl;
+    std::cout << "        Plot min bin value: " << value.canvas.plot_ToT.min << std::endl;
+    std::cout << "        Plot max bin value: " << value.canvas.plot_ToT.max << std::endl;
+    std::cout << "        Plot title: " << value.canvas.plot_ToT.title << std::endl;
 
     std::cout << "    Plot Hits histogram: " << std::endl;
     std::cout << "        Plot bin value: " << value.canvas.plot_hits.bins << std::endl;
