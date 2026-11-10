@@ -163,6 +163,18 @@ int main(int argc, char* argv[]) {
         delete app;
         app = nullptr; 
     
+    } else if(cfg.general.operation_mode.find("ToT") != std::string::npos) {
+        ROOT::RDF::RNode node_ToT = data_frame;
+        node_ToT = DefineTOT_Node(node_ToT, cfg);
+
+        TCanvas* c_ToTtrg = new TCanvas("c_ToTtrg", "ToT", 800, 600);
+        int ret = Plot_ToT(c_ToTtrg, node_ToT, cfg, cfg.analysis.ToT.ToT_first[2][0]);
+
+        app->Run();
+            
+        delete app;
+        app = nullptr; 
+
     } else if(cfg.general.operation_mode.find("efficiency") != std::string::npos) {
         ROOT::RDF::RNode node_Hits = data_frame;
 
@@ -196,7 +208,7 @@ int main(int argc, char* argv[]) {
         for(size_t k = 0; k < cfg.efficiency.gate_channel.size() + 1; k++) {
             double hit = h_gate->GetBinContent(k + 1);
             gate_hits.push_back(hit);
-            std::cout << "Gate Efficiency for " << k << " hits: " << hit/total_gate_events << std::endl;
+            std::cout << "Gate counts for " << k << " hitted channels: " << hit/total_gate_events << std::endl;
         }
 
         std::cout << "-------------------------------------------------" << std::endl;
@@ -206,7 +218,7 @@ int main(int argc, char* argv[]) {
         for(size_t k = 0; k < cfg.efficiency.gate_channel.size() + 1; k++) {
             double hit = h_tof->GetBinContent(k + 1);
             tof_hits.push_back(hit);
-            std::cout << "ToF Efficiency for " << k << " hits: " << hit/total_tof_events << std::endl;
+            std::cout << "ToF counts for " << k << " hitted channels: " << hit/total_tof_events << std::endl;
         }
 
         std::cout << "-------------------------------------------------" << std::endl;
