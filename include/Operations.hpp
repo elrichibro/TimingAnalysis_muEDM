@@ -9,5 +9,12 @@
 
 ROOT::RDF::RNode CalculateDelta_FirstToA(ROOT::RDF::RNode node, const first_ToA& f_ToA);
 
+struct Eff_Container_Multi {
+    double thr1;
+    double thr2;
+    double eff;
+};
+
+int ProcessAllData(const config_struct& cfg, std::vector<std::string>& paths, std::unordered_map<std::string, std::pair<double, double>>& file_container);
 
 #endif
