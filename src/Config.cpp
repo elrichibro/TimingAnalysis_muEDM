@@ -27,6 +27,7 @@ int Configure(config_struct& value, const std::string& json_path) {
             const auto& j = json_obj["general"];
 
             value.general.operation_mode = j.value("operation_mode", value.general.operation_mode);
+            value.general.data_type = j.value("data_type", value.general.data_type);
             value.general.verbose = j.value("verbose", value.general.verbose);
             value.general.visualize = j.value("visualize", value.general.visualize);
         }
@@ -34,12 +35,16 @@ int Configure(config_struct& value, const std::string& json_path) {
         if (json_obj.contains("io")) {
             const auto& j = json_obj["io"];
 
-            value.io.tree_data_name = j.value("tree_data_name", value.io.tree_data_name);
-            value.io.in_data_file = j.value("in_data_file", value.io.in_data_file);
+            value.io.single_data.tree_data_name = j["single_data"].value("tree_data_name", value.io.single_data.tree_data_name);
+            value.io.single_data.in_data_file = j["single_data"].value("in_data_file", value.io.single_data.in_data_file);
             
-            value.io.all_dataset = j.value("all_dataset", value.io.all_dataset);
-            value.io.dataset_min = j.value("dataset_min", value.io.dataset_min);
-            value.io.dataset_max = j.value("dataset_max", value.io.dataset_max);
+            value.io.all_data.tree_all_data = j["all_data"].value("tree_all_data", value.io.all_data.tree_all_data);
+            value.io.all_data.in_all_data = j["all_data"].value("in_all_data", value.io.all_data.in_all_data);
+
+            value.io.all_data.dataset_min = j["all_data"].value("dataset_min", value.io.all_data.dataset_min);
+            value.io.all_data.dataset_max = j["all_data"].value("dataset_max", value.io.all_data.dataset_max);
+            value.io.all_data.thr1 = j["all_data"].value("thr1", value.io.all_data.thr1);
+            value.io.all_data.thr2 = j["all_data"].value("thr2", value.io.all_data.thr2);
 
             value.io.columns.channel = j["columns"].value("channel", value.io.columns.channel);
             value.io.columns.edge = j["columns"].value("edge", value.io.columns.edge);
@@ -128,6 +133,7 @@ void Verbose_config(const config_struct& value) {
 
     std::cout << "General settings:" << std::endl;
     std::cout << "    Operation mode: " << value.general.operation_mode << std::endl;
+    std::cout << "    Data type: " << value.general.data_type << std::endl;
     std::cout << "    Verbose mode: " << value.general.verbose << std::endl;
     std::cout << "    Visualize flag: " << value.general.visualize << std::endl;
 
@@ -142,12 +148,32 @@ void Verbose_config(const config_struct& value) {
     std::cout << "" << std::endl;
 
     std::cout << "I/O settings:" << std::endl;
-    std::cout << "    Input data file: " << value.io.in_data_file << std::endl;
-    std::cout << "    Data Tree: " << value.io.tree_data_name << std::endl;
+    std::cout << "    Single data file option: " << std::endl;
+    std::cout << "        Input data file: " << value.io.single_data.in_data_file << std::endl;
+    std::cout << "        Data Tree: " << value.io.single_data.tree_data_name << std::endl;
 
-    std::cout << "    All dataset flag: " << value.io.all_dataset << std::endl;
-    std::cout << "    Dataset min: " << value.io.dataset_min << std::endl;
-    std::cout << "    Dataset max: " << value.io.dataset_max << std::endl;
+    std::cout << "    All data file option: " << std::endl;
+    std::cout << "        Input data file: " << value.io.all_data.in_all_data << std::endl;
+    std::cout << "        Data Tree: " << value.io.all_data.tree_all_data << std::endl;
+    std::cout << "        Dataset min: " << value.io.all_data.dataset_min << std::endl;
+    std::cout << "        Dataset max: " << value.io.all_data.dataset_max << std::endl;
+    std::cout << "        Threshold vector 1: {"; 
+    for(size_t i = 0; i < value.io.all_data.thr1.size(); i++) {    
+        std::cout << value.io.all_data.thr1[i];
+        if(i != (value.io.all_data.thr1.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+    std::cout << "        Threshold vector 2: {"; 
+    for(size_t i = 0; i < value.io.all_data.thr2.size(); i++) {    
+        std::cout << value.io.all_data.thr2[i];
+        if(i != (value.io.all_data.thr2.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
 
     std::cout << "    Tree column names: " << std::endl;
     std::cout << "        Channel columns: " << value.io.columns.channel << std::endl;
