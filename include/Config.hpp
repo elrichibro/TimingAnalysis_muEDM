@@ -10,6 +10,7 @@
 
 struct general_config {
     std::string operation_mode = "";
+    std::string data_type = "";
     int verbose = 0;
     bool visualize = false;
 };
@@ -17,6 +18,20 @@ struct general_config {
 // ---
 // I/O
 // ---
+
+struct single_data_config {
+    std::string tree_data_name = "";
+    std::string in_data_file = "";
+};
+
+struct all_data_config {
+    std::string tree_all_data = "";
+    std::string in_all_data = "";
+    int dataset_min;
+    int dataset_max;
+    std::vector<double> thr1;
+    std::vector<double> thr2;
+};
 
 struct columns_config {
     std::string channel = "";
@@ -26,11 +41,8 @@ struct columns_config {
 };
 
 struct io_config {
-    std::string tree_data_name = "";
-    std::string in_data_file = "";
-    bool all_dataset = false;
-    int dataset_min;
-    int dataset_max;
+    single_data_config single_data;
+    all_data_config all_data;
     columns_config columns;
 };
 
@@ -129,5 +141,8 @@ int Configure(config_struct& value, const std::string& json_path);
 // ------------------------------------------------------------------------------------------------------------------------------------
 
 void Verbose_config(const config_struct& value);
+
+// ------------------------------------------------------------------------------------------------------------------------------------
+
 
 #endif
