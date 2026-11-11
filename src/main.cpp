@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 #include <TApplication.h>
 
@@ -89,6 +90,7 @@ int main(int argc, char* argv[]) {
 
     config_struct cfg;
     std::string json_path = "";
+
     std::vector<double> gate_hits;
     std::vector<double> tof_hits;    
     
@@ -130,7 +132,15 @@ int main(int argc, char* argv[]) {
     if (verbose) {
         Verbose_config(cfg);
     }
+    
+    std::vector<std::string> data_path;
+    std::unordered_map<std::string , std::pair<double, double>> file_container;
 
+    if(cfg.general.data_type == "all") {
+        // Options are "single", "all"
+        int ret = ProcessAllData(cfg, data_path, file_container);
+    }
+    
     // ------------------------------------------------------------------------------------------------------------------------------------
     // OPERATION
     // ------------------------------------------------------------------------------------------------------------------------------------
@@ -143,139 +153,168 @@ int main(int argc, char* argv[]) {
         app = new TApplication("app", &argc, argv);
     }
 
-    ROOT::RDataFrame data_frame(cfg.io.tree_data_name, cfg.io.in_data_file);
+    if(cfg.general.data_type == "single") {
+        ROOT::RDataFrame data_frame(cfg.io.single_data.tree_data_name, cfg.io.single_data.in_data_file);
 
-    // ---------
-    // Delta ToA
-    // ---------
+        // ---------
+        // Delta ToA
+        // ---------
 
-    if (cfg.general.operation_mode.find("DeltaToA") != std::string::npos) {
-        ROOT::RDF::RNode node_DeltaToA = data_frame;
+        if (cfg.general.operation_mode.find("DeltaToA") != std::string::npos) {
+            ROOT::RDF::RNode node_DeltaToA = data_frame;
 
-        node_DeltaToA = FirstToA_Node(node_DeltaToA, cfg);
-        node_DeltaToA = CalculateDelta_FirstToA(node_DeltaToA, cfg.analysis.f_ToA);
-        
-        TCanvas* c_DeltaToA = new TCanvas("c_DeltaToA", "DeltaToA", 800, 600);
-        int ret = Plot_DeltaFirstToA(c_DeltaToA, node_DeltaToA, cfg.analysis.f_ToA, cfg.canvas.plot_delta_ToA);
-
-        app->Run();
+            node_DeltaToA = FirstToA_Node(node_DeltaToA, cfg);
+            node_DeltaToA = CalculateDelta_FirstToA(node_DeltaToA, cfg.analysis.f_ToA);
             
-        delete app;
-        app = nullptr; 
-    
-    } else if(cfg.general.operation_mode.find("ToT") != std::string::npos) {
-        ROOT::RDF::RNode node_ToT = data_frame;
-        node_ToT = DefineTOT_Node(node_ToT, cfg);
-
-        TCanvas* c_ToTtrg = new TCanvas("c_ToTtrg", "ToT", 800, 600);
-        int ret = Plot_ToT(c_ToTtrg, node_ToT, cfg, cfg.analysis.ToT.ToT_first[2][0]);
-
-        app->Run();
-            
-        delete app;
-        app = nullptr; 
-
-    } else if(cfg.general.operation_mode.find("Efficiency") != std::string::npos) {
-        ROOT::RDF::RNode node_Hits = data_frame;
-
-        std::string edge_mask = cfg.io.columns.edge + "== 1";
-        std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]";
-        
-        node_Hits = node_Hits
-            .Define("Mask_Lead", edge_mask.c_str())
-            .Define("Ch_Lead", channel_mask.c_str())
-            .Filter("Any(Ch_Lead == 62)", "Triggered Event");
-
-        if(cfg.efficiency.eff_mode == "hits_ch") {
-            std::string col = cfg.efficiency.hits_ch.column_name;
-            TCanvas* c_hits = new TCanvas("c_hits", "Hits", 800, 600);
-
-            if(cfg.efficiency.hits_ch.detector == "tof") {    
-                node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.tof_channel, col);
-                int ret = Plot_Hits(c_hits, node_Hits, cfg, col, cfg.efficiency.ch.tof_channel);
-
-            } else if(cfg.efficiency.hits_ch.detector == "gate") {
-                node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.gate_channel, col);
-                int ret = Plot_Hits(c_hits, node_Hits, cfg, col, cfg.efficiency.ch.gate_channel);
-            }
+            TCanvas* c_DeltaToA = new TCanvas("c_DeltaToA", "DeltaToA", 800, 600);
+            int ret = Plot_DeltaFirstToA(c_DeltaToA, node_DeltaToA, cfg.analysis.f_ToA, cfg.canvas.plot_delta_ToA);
 
             app->Run();
                 
             delete app;
             app = nullptr; 
+        
+        } else if(cfg.general.operation_mode.find("ToT") != std::string::npos) {
+            ROOT::RDF::RNode node_ToT = data_frame;
+            node_ToT = DefineTOT_Node(node_ToT, cfg);
+
+            TCanvas* c_ToTtrg = new TCanvas("c_ToTtrg", "ToT", 800, 600);
+            int ret = Plot_ToT(c_ToTtrg, node_ToT, cfg, cfg.analysis.ToT.ToT_first[2][0]);
+
+            app->Run();
+                
+            delete app;
+            app = nullptr; 
+
+        } else if(cfg.general.operation_mode.find("Efficiency") != std::string::npos) {
+            ROOT::RDF::RNode node_Hits = data_frame;
+
+            std::string edge_mask = cfg.io.columns.edge + "== 1";
+            std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]";
+            
+            node_Hits = node_Hits
+                .Define("Mask_Lead", edge_mask.c_str())
+                .Define("Ch_Lead", channel_mask.c_str())
+                .Filter("Any(Ch_Lead == 62)", "Triggered Event");
+
+            if(cfg.efficiency.eff_mode == "hits_ch") {
+                std::string col = cfg.efficiency.hits_ch.column_name;
+                TCanvas* c_hits = new TCanvas("c_hits", "Hits", 800, 600);
+
+                if(cfg.efficiency.hits_ch.detector == "tof") {    
+                    node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.tof_channel, col);
+                    int ret = Plot_Hits(c_hits, node_Hits, cfg, col, cfg.efficiency.ch.tof_channel);
+
+                } else if(cfg.efficiency.hits_ch.detector == "gate") {
+                    node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.gate_channel, col);
+                    int ret = Plot_Hits(c_hits, node_Hits, cfg, col, cfg.efficiency.ch.gate_channel);
+                }
+
+                app->Run();
+                    
+                delete app;
+                app = nullptr; 
+            }
+
+        } else if(cfg.general.operation_mode.find("efficiency") != std::string::npos) {
+            ROOT::RDF::RNode node_Hits = data_frame;
+
+            std::string edge_mask = cfg.io.columns.edge + "== 1";
+            std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]";
+            
+            node_Hits = node_Hits
+                .Define("Mask_Lead", edge_mask.c_str())
+                .Define("Ch_Lead", channel_mask.c_str())
+                .Filter("Any(Ch_Lead == 62)", "Triggered Event");
+
+            auto cut_report = node_Hits.Report();
+            
+            node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.gate_channel, cfg.efficiency.event.gate_column);
+            node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.tof_channel, cfg.efficiency.event.tof_column);
+
+            auto plot = cfg.canvas.plot_hits;
+            auto hist_hits_gate = node_Hits.Histo1D({"hist_hits_gate", plot.title.c_str(), plot.bins, plot.min, plot.max}, cfg.efficiency.event.gate_column);
+            auto hist_hits_tof = node_Hits.Histo1D({"hist_hits_tof", plot.title.c_str(), plot.bins, plot.min, plot.max}, cfg.efficiency.event.tof_column);
+            
+            auto h_map = node_Hits.Histo2D({"h_map", "Gate vs ToF;Gate Hits;ToF Hits", plot.bins, plot.min, plot.max, plot.bins, plot.min, plot.max},
+                cfg.efficiency.event.gate_column, cfg.efficiency.event.tof_column);
+
+            cut_report->Print();
+
+            TH1D* h_gate = hist_hits_gate.GetPtr();
+            double total_gate_events = h_gate->GetEntries();
+            
+            std::cout << "-------------------------------------------------" << std::endl;
+
+            for(size_t k = 0; k < cfg.efficiency.ch.gate_channel.size() + 1; k++) {
+                double hit = h_gate->GetBinContent(k + 1);
+                gate_hits.push_back(hit);
+                std::cout << "Gate counts for " << k << " hitted channels: " << hit/total_gate_events << std::endl;
+            }
+
+            std::cout << "-------------------------------------------------" << std::endl;
+
+            TH1D* h_tof = hist_hits_tof.GetPtr();
+            double total_tof_events = h_tof->GetEntries();
+            for(size_t k = 0; k < cfg.efficiency.ch.gate_channel.size() + 1; k++) {
+                double hit = h_tof->GetBinContent(k + 1);
+                tof_hits.push_back(hit);
+                std::cout << "ToF counts for " << k << " hitted channels: " << hit/total_tof_events << std::endl;
+            }
+
+            std::cout << "-------------------------------------------------" << std::endl;
+
+            if(visualize) {
+                TCanvas* c_Gate = new TCanvas("c_Gate", "Hits Gate", 800, 600);
+                c_Gate->cd();
+                hist_hits_gate->Draw();
+                c_Gate->Update();
+
+                TCanvas* c_ToF = new TCanvas("c_ToF", "Hits ToF", 800, 600);
+                c_ToF->cd();
+                hist_hits_tof->Draw();
+                c_ToF->Update();
+
+                TCanvas* c_cov = new TCanvas("c_cov", "Hits Gate vs ToF", 800, 600);
+                c_cov->cd();
+                h_map->Draw("COLZ TEXT");
+                c_cov->Update();
+
+                app->Run();
+
+                delete app;
+                app = nullptr;
+            }
+        } else {
+            printf("ERROR: invalid operation mode, exiting...");
         }
+    } else if (cfg.general.data_type == "all") {
+        ROOT::RDataFrame dataset(cfg.io.all_data.tree_all_data, data_path);
 
-    } else if(cfg.general.operation_mode.find("efficiency") != std::string::npos) {
-        ROOT::RDF::RNode node_Hits = data_frame;
-
-        std::string edge_mask = cfg.io.columns.edge + "== 1";
-        std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]";
+        ROOT::RDF::RNode node_AllData = dataset
+            .Define("Thr_Detector1", [&file_container](const ROOT::RDF::RSampleInfo& id) -> double {
+                return file_container.at(id.AsString()).first; 
+            }, ROOT::RDF::ColumnNames_t{})
         
-        node_Hits = node_Hits
-            .Define("Mask_Lead", edge_mask.c_str())
-            .Define("Ch_Lead", channel_mask.c_str())
-            .Filter("Any(Ch_Lead == 62)", "Triggered Event");
+            .Define("Thr_Detector2", [&file_container](const ROOT::RDF::RSampleInfo& id) -> double {
+                return file_container.at(id.AsString()).second;
+            }, ROOT::RDF::ColumnNames_t{});
 
-        auto cut_report = node_Hits.Report();
-        
-        node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.gate_channel, cfg.efficiency.event.gate_column);
-        node_Hits = EventHits(node_Hits, cfg, cfg.efficiency.ch.tof_channel, cfg.efficiency.event.tof_column);
-
-        auto plot = cfg.canvas.plot_hits;
-        auto hist_hits_gate = node_Hits.Histo1D({"hist_hits_gate", plot.title.c_str(), plot.bins, plot.min, plot.max}, cfg.efficiency.event.gate_column);
-        auto hist_hits_tof = node_Hits.Histo1D({"hist_hits_tof", plot.title.c_str(), plot.bins, plot.min, plot.max}, cfg.efficiency.event.tof_column);
-        
-        auto h_map = node_Hits.Histo2D({"h_map", "Gate vs ToF;Gate Hits;ToF Hits", plot.bins, plot.min, plot.max, plot.bins, plot.min, plot.max},
-             cfg.efficiency.event.gate_column, cfg.efficiency.event.tof_column);
-
-        cut_report->Print();
-
-        TH1D* h_gate = hist_hits_gate.GetPtr();
-        double total_gate_events = h_gate->GetEntries();
-        
-        std::cout << "-------------------------------------------------" << std::endl;
-
-        for(size_t k = 0; k < cfg.efficiency.ch.gate_channel.size() + 1; k++) {
-            double hit = h_gate->GetBinContent(k + 1);
-            gate_hits.push_back(hit);
-            std::cout << "Gate counts for " << k << " hitted channels: " << hit/total_gate_events << std::endl;
-        }
-
-        std::cout << "-------------------------------------------------" << std::endl;
-
-        TH1D* h_tof = hist_hits_tof.GetPtr();
-        double total_tof_events = h_tof->GetEntries();
-        for(size_t k = 0; k < cfg.efficiency.ch.gate_channel.size() + 1; k++) {
-            double hit = h_tof->GetBinContent(k + 1);
-            tof_hits.push_back(hit);
-            std::cout << "ToF counts for " << k << " hitted channels: " << hit/total_tof_events << std::endl;
-        }
-
-        std::cout << "-------------------------------------------------" << std::endl;
-
-        if(visualize) {
+        if(cfg.general.operation_mode == "Test") {
+            std::cout << "Operation mode: Test -> Selected" << std::endl;
+            auto hist = node_AllData.Histo1D({"hist", "hits;Thr;Events", 100, -50, 50}, "Thr_Detector1");
             TCanvas* c_Gate = new TCanvas("c_Gate", "Hits Gate", 800, 600);
             c_Gate->cd();
-            hist_hits_gate->Draw();
+            hist->Draw();
             c_Gate->Update();
 
-            TCanvas* c_ToF = new TCanvas("c_ToF", "Hits ToF", 800, 600);
-            c_ToF->cd();
-            hist_hits_tof->Draw();
-            c_ToF->Update();
-
-            TCanvas* c_cov = new TCanvas("c_cov", "Hits Gate vs ToF", 800, 600);
-            c_cov->cd();
-            h_map->Draw("COLZ TEXT");
-            c_cov->Update();
-
+            if(visualize) {
             app->Run();
 
             delete app;
             app = nullptr;
+            }
         }
-    } else {
-        printf("ERROR: invalid operation mode, exiting...");
     }
 
     return 0;
