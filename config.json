@@ -1,51 +1,61 @@
 {
     "general": { 
-        "operation_mode":"Test",
-        "data_type": "all",
+        "operation_mode":"preSelection",
+        "data_type": "single",
         "verbose": 1,
         "visualize":true
     },
   
     "io": {
         "single_data":{
-            "tree_data_name":"Event",
-            "in_data_file":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root"
-        },
-        "all_data": {
-            "tree_all_data":"raw",
-            "in_all_data":"../../dati/09_11_26/raw00",
-            "dataset_min": 1584,     
-            "dataset_max": 1711,
-            "thr1" : [-6, -8, -10, -12, -14, -16, -18, -20],
-            "thr2" : [-6, -8, -10, -12, -14, -16, -18, -20]
-        },
-         
-        "columns":{
-            "channel":"Fers5203Pulses.channelID",
-            "edge":"Fers5203Pulses.edge",
-            "ToA":"Fers5203Pulses.toaTicks",
-            "ToT":"Fers5203Pulses.totTicks"
+            "input_data":"../../dati/03_11_26/root/Run_Gate_TOF_50mV.root",
+            "input_tree":"Event",
+            
+            "columns":{
+                "channel":"Fers5203Pulses.channelID",
+                "edge":"Fers5203Pulses.edge",
+                "ToA":"Fers5203Pulses.toaTicks",
+                "ToT":"Fers5203Pulses.totTicks"
+            }
         }
     },
   
+    "preSelection": {
+        "input":{
+            "input_data":"../../dati/09_11_26/raw00",
+            "input_tree":"raw",
+            "dataset_min": 1584,     
+            "dataset_max": 1711,
+            "thr1" : [-6, -8, -10, -12, -14, -16, -18, -20],
+            "thr2" : [-6, -8, -10, -12, -14, -16, -18, -20],
+            "run_column": "Run",
+            "thr_columns": ["Thr_TOF4", "Thr_TOF3"]
+        },
+        "output": {
+            "output_data":"../output/preSelection_TOF4_TOF3.root",
+            "output_tree":"raw",
+            
+            "columns": ["Run", "Fers5203Pulses.channelID", "Fers5203Pulses.edge", "Fers5203Pulses.toaTicks", "Thr_TOF4", "Thr_TOF3"]
+        }
+    },
     "efficiency": {
         "eff_mode":"hits_ch",
         "hits_ch":{
-            "detector": "gate",
+            "detector": "detector1",
             "column_name": "Gate_Hits"
         },
 
         "ch": {
-            "gate_channel":[39, 41, 59, 61], 
-            "tof_channel":[3, 5, 23, 25],
+            "detector1_channel":[39, 41, 59, 61], 
+            "detector2_channel":[3, 5, 23, 25],
             "trigger_channel":62
         },
 
         "event":{
             "channel_hits":true,
             "hits":[0, 1, 2, 3, 4],
-            "gate_column": "Gate_Hits",
-            "tof_column": "ToF_Hits"
+            "detector1_column": "Gate_Hits",
+            "detector2_column": "ToF_Hits"
         }
     },
 

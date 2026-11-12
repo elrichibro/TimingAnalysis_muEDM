@@ -23,6 +23,10 @@ int Configure(config_struct& value, const std::string& json_path) {
         nlohmann::json json_obj;
         file >> json_obj;
 
+        // -------
+        // General
+        // -------
+
         if (json_obj.contains("general")) {
             const auto& j = json_obj["general"];
 
@@ -32,25 +36,46 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.general.visualize = j.value("visualize", value.general.visualize);
         }
 
+        // ---
+        // I/O
+        // ---
+
         if (json_obj.contains("io")) {
             const auto& j = json_obj["io"];
 
-            value.io.single_data.tree_data_name = j["single_data"].value("tree_data_name", value.io.single_data.tree_data_name);
-            value.io.single_data.in_data_file = j["single_data"].value("in_data_file", value.io.single_data.in_data_file);
-            
-            value.io.all_data.tree_all_data = j["all_data"].value("tree_all_data", value.io.all_data.tree_all_data);
-            value.io.all_data.in_all_data = j["all_data"].value("in_all_data", value.io.all_data.in_all_data);
+            value.io.single_data.input_data = j["single_data"].value("input_data", value.io.single_data.input_data);
+            value.io.single_data.input_tree = j["single_data"].value("input_tree", value.io.single_data.input_tree);
 
-            value.io.all_data.dataset_min = j["all_data"].value("dataset_min", value.io.all_data.dataset_min);
-            value.io.all_data.dataset_max = j["all_data"].value("dataset_max", value.io.all_data.dataset_max);
-            value.io.all_data.thr1 = j["all_data"].value("thr1", value.io.all_data.thr1);
-            value.io.all_data.thr2 = j["all_data"].value("thr2", value.io.all_data.thr2);
-
-            value.io.columns.channel = j["columns"].value("channel", value.io.columns.channel);
-            value.io.columns.edge = j["columns"].value("edge", value.io.columns.edge);
-            value.io.columns.ToA = j["columns"].value("ToA", value.io.columns.ToA);
-            value.io.columns.ToT = j["columns"].value("ToT", value.io.columns.ToT);
+            value.io.single_data.columns.channel = j["single_data"]["columns"].value("channel", value.io.single_data.columns.channel);
+            value.io.single_data.columns.edge = j["single_data"]["columns"].value("edge", value.io.single_data.columns.edge);
+            value.io.single_data.columns.ToA = j["single_data"]["columns"].value("ToA", value.io.single_data.columns.ToA);
+            value.io.single_data.columns.ToT = j["single_data"]["columns"].value("ToT", value.io.single_data.columns.ToT);
         }
+
+        // ------------
+        // preSelection
+        // ------------
+        
+        if (json_obj.contains("preSelection")) {
+            const auto& j = json_obj["preSelection"];
+
+            value.preSelection.input.input_data = j["input"].value("input_data", value.preSelection.input.input_data);
+            value.preSelection.input.input_tree = j["input"].value("input_tree", value.preSelection.input.input_tree);
+            value.preSelection.input.dataset_min = j["input"].value("dataset_min", value.preSelection.input.dataset_min);
+            value.preSelection.input.dataset_max = j["input"].value("dataset_max", value.preSelection.input.dataset_max);
+            value.preSelection.input.thr1 = j["input"].value("thr1", value.preSelection.input.thr1);
+            value.preSelection.input.thr2 = j["input"].value("thr2", value.preSelection.input.thr2);
+            value.preSelection.input.run_column = j["input"].value("run_column", value.preSelection.input.run_column);
+            value.preSelection.input.thr_columns = j["input"].value("thr_columns", value.preSelection.input.thr_columns);
+
+            value.preSelection.output.output_data = j["output"].value("output_data", value.preSelection.output.output_data);
+            value.preSelection.output.output_tree = j["output"].value("output_tree", value.preSelection.output.output_tree);
+            value.preSelection.output.columns = j["output"].value("columns", value.preSelection.output.columns);
+        }
+
+        // ----------
+        // Efficiency
+        // ----------
 
         if (json_obj.contains("efficiency")) {
             const auto& j = json_obj["efficiency"];
@@ -59,15 +84,19 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.efficiency.hits_ch.detector = j["hits_ch"].value("detector", value.efficiency.hits_ch.detector);
             value.efficiency.hits_ch.column_name = j["hits_ch"].value("column_name", value.efficiency.hits_ch.column_name);
 
-            value.efficiency.ch.gate_channel = j["ch"].value("gate_channel", value.efficiency.ch.gate_channel);
-            value.efficiency.ch.tof_channel = j["ch"].value("tof_channel", value.efficiency.ch.tof_channel);
+            value.efficiency.ch.detector1_channel = j["ch"].value("detector1_channel", value.efficiency.ch.detector1_channel);
+            value.efficiency.ch.detector2_channel = j["ch"].value("detector2_channel", value.efficiency.ch.detector2_channel);
             value.efficiency.ch.trigger_channel = j["ch"].value("trigger_channel", value.efficiency.ch.trigger_channel);
 
             value.efficiency.event.channel_hits = j["event"].value("channel_hits", value.efficiency.event.channel_hits);
             value.efficiency.event.hits = j["event"].value("hits", value.efficiency.event.hits);
-            value.efficiency.event.gate_column = j["event"].value("gate_column", value.efficiency.event.gate_column);
-            value.efficiency.event.tof_column = j["event"].value("tof_column", value.efficiency.event.tof_column);
+            value.efficiency.event.detector1_column = j["event"].value("detector1_column", value.efficiency.event.detector1_column);
+            value.efficiency.event.detector2_column = j["event"].value("detector2_column", value.efficiency.event.detector2_column);
         }
+
+        // --------
+        // Analysis
+        // --------
 
         if (json_obj.contains("analysis")) {
             const auto& j = json_obj["analysis"];
@@ -90,6 +119,10 @@ int Configure(config_struct& value, const std::string& json_path) {
             value.analysis.ToT.ToT_first = j["ToT"].value("ToT_first", value.analysis.ToT.ToT_first);
             value.analysis.ToT.ToT_first_ToA = j["ToT"].value("ToT_first_ToA", value.analysis.ToT.ToT_first_ToA);
         }
+
+        // ------
+        // Canvas
+        // ------
 
         if (json_obj.contains("canvas")) {
             const auto& j = json_obj["canvas"];
@@ -149,38 +182,71 @@ void Verbose_config(const config_struct& value) {
 
     std::cout << "I/O settings:" << std::endl;
     std::cout << "    Single data file option: " << std::endl;
-    std::cout << "        Input data file: " << value.io.single_data.in_data_file << std::endl;
-    std::cout << "        Data Tree: " << value.io.single_data.tree_data_name << std::endl;
-
-    std::cout << "    All data file option: " << std::endl;
-    std::cout << "        Input data file: " << value.io.all_data.in_all_data << std::endl;
-    std::cout << "        Data Tree: " << value.io.all_data.tree_all_data << std::endl;
-    std::cout << "        Dataset min: " << value.io.all_data.dataset_min << std::endl;
-    std::cout << "        Dataset max: " << value.io.all_data.dataset_max << std::endl;
-    std::cout << "        Threshold vector 1: {"; 
-    for(size_t i = 0; i < value.io.all_data.thr1.size(); i++) {    
-        std::cout << value.io.all_data.thr1[i];
-        if(i != (value.io.all_data.thr1.size() - 1)) {
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
-
-    std::cout << "        Threshold vector 2: {"; 
-    for(size_t i = 0; i < value.io.all_data.thr2.size(); i++) {    
-        std::cout << value.io.all_data.thr2[i];
-        if(i != (value.io.all_data.thr2.size() - 1)) {
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
+    std::cout << "        Input data file: " << value.io.single_data.input_data << std::endl;
+    std::cout << "        Data Tree: " << value.io.single_data.input_tree << std::endl;
 
     std::cout << "    Tree column names: " << std::endl;
-    std::cout << "        Channel columns: " << value.io.columns.channel << std::endl;
-    std::cout << "        Edge columns: " << value.io.columns.edge << std::endl;
-    std::cout << "        ToA columns: " << value.io.columns.ToA << std::endl;
-    std::cout << "        ToT columns: " << value.io.columns.ToT << std::endl;
-    
+    std::cout << "        Channel columns: " << value.io.single_data.columns.channel << std::endl;
+    std::cout << "        Edge columns: " << value.io.single_data.columns.edge << std::endl;
+    std::cout << "        ToA columns: " << value.io.single_data.columns.ToA << std::endl;
+    std::cout << "        ToT columns: " << value.io.single_data.columns.ToT << std::endl;
+
+    std::cout << "" << std::endl;
+    std::cout << "--------------------------------------------------------------------" << std::endl;
+
+    // ------------
+    // PreSelection
+    // ------------
+
+    std::cout << "--------------------------------------------------------------------" << std::endl;
+    std::cout << "" << std::endl;
+
+    std::cout << "PreSelection settings:" << std::endl;
+    std::cout << "    Input: " << std::endl;
+    std::cout << "        Input data prefix: " << value.preSelection.input.input_data << std::endl;
+    std::cout << "        Data Tree: " << value.preSelection.input.input_tree << std::endl;
+    std::cout << "        Dataset min: " << value.preSelection.input.dataset_min << std::endl;
+    std::cout << "        Dataset max: " << value.preSelection.input.dataset_max << std::endl;
+    std::cout << "        Threshold vector 1: {";
+    for(size_t i = 0; i < value.preSelection.input.thr1.size(); i++) {
+        std::cout << value.preSelection.input.thr1[i];
+        if(i != (value.preSelection.input.thr1.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+    std::cout << "        Threshold vector 2: {";
+    for(size_t i = 0; i < value.preSelection.input.thr2.size(); i++) {
+        std::cout << value.preSelection.input.thr2[i];
+        if(i != (value.preSelection.input.thr2.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+    std::cout << "        Run column: " << value.preSelection.input.run_column << std::endl;
+    std::cout << "        Threshold columns: {";
+    for(size_t i = 0; i < value.preSelection.input.thr_columns.size(); i++) {
+        std::cout << value.preSelection.input.thr_columns[i];
+        if(i != (value.preSelection.input.thr_columns.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+    std::cout << "    Output: " << std::endl;
+    std::cout << "        Output folder: " << value.preSelection.output.output_data << std::endl;
+    std::cout << "        Output Tree: " << value.preSelection.output.output_tree << std::endl;
+    std::cout << "        Saved columns: {";
+    for(size_t i = 0; i < value.preSelection.output.columns.size(); i++) {
+        std::cout << value.preSelection.output.columns[i];
+        if(i != (value.preSelection.output.columns.size() - 1)) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
     std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
 
@@ -202,19 +268,19 @@ void Verbose_config(const config_struct& value) {
     
 
     std::cout << "    Channels: " << std::endl;
-    std::cout << "        Gate channels: {"; 
-    for(size_t i = 0; i < value.efficiency.ch.gate_channel.size(); i++) {    
-        std::cout << value.efficiency.ch.gate_channel[i];
-        if(i != (value.efficiency.ch.gate_channel.size() - 1)) {
+    std::cout << "        Detector 1 channels: {"; 
+    for(size_t i = 0; i < value.efficiency.ch.detector1_channel.size(); i++) {    
+        std::cout << value.efficiency.ch.detector1_channel[i];
+        if(i != (value.efficiency.ch.detector1_channel.size() - 1)) {
             std::cout << ", ";
         }
     }
     std::cout << "}" << std::endl;
 
-    std::cout << "        ToF channels: {"; 
-    for(size_t i = 0; i < value.efficiency.ch.tof_channel.size(); i++) {    
-        std::cout << value.efficiency.ch.tof_channel[i];
-        if(i != (value.efficiency.ch.tof_channel.size() - 1)) {
+    std::cout << "        Detector 2 channels: {"; 
+    for(size_t i = 0; i < value.efficiency.ch.detector2_channel.size(); i++) {    
+        std::cout << value.efficiency.ch.detector2_channel[i];
+        if(i != (value.efficiency.ch.detector2_channel.size() - 1)) {
             std::cout << ", ";
         }
     }
@@ -232,8 +298,8 @@ void Verbose_config(const config_struct& value) {
         }
     }
     std::cout << "}" << std::endl;
-    std::cout << "        Gate column: " << value.efficiency.event.gate_column << std::endl;
-    std::cout << "        ToF column: " << value.efficiency.event.tof_column << std::endl; 
+    std::cout << "        Detector 1 column: " << value.efficiency.event.detector1_column << std::endl;
+    std::cout << "        Detector 2 column: " << value.efficiency.event.detector2_column << std::endl; 
 
     std::cout << "" << std::endl;
     std::cout << "--------------------------------------------------------------------" << std::endl;
