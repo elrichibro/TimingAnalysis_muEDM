@@ -90,7 +90,7 @@ int PlotTOA_MEAN(TCanvas* c_all, ROOT::RDF::RNode node, const std::vector<int>& 
 
 
 
-int Plot_DeltaFirstToA(TCanvas* c_all, ROOT::RDF::RNode node, const first_ToA& f_ToA, const plot_config& plot) {
+int Plot_DeltaFirstToA(TCanvas* c_all, ROOT::RDF::RNode node, const first_ToA& f_ToA, const plot_cfg& plot) {
     if (!c_all) return -1;
     
     c_all->cd();
