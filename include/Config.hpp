@@ -8,7 +8,7 @@
 // General
 // -------
 
-struct general_config {
+struct general_cfg {
     std::string operation_mode = "";
     std::string data_type = "";
     int verbose = 0;
@@ -19,31 +19,47 @@ struct general_config {
 // I/O
 // ---
 
-struct single_data_config {
-    std::string tree_data_name = "";
-    std::string in_data_file = "";
-};
-
-struct all_data_config {
-    std::string tree_all_data = "";
-    std::string in_all_data = "";
-    int dataset_min;
-    int dataset_max;
-    std::vector<double> thr1;
-    std::vector<double> thr2;
-};
-
-struct columns_config {
+struct columns_cfg {
     std::string channel = "";
     std::string edge = "";
     std::string ToA = "";
     std::string ToT = "";
 };
 
-struct io_config {
-    single_data_config single_data;
-    all_data_config all_data;
-    columns_config columns;
+struct single_data_cfg {
+    std::string input_data = "";
+    std::string input_tree = "";
+    columns_cfg columns;
+};
+
+struct io_cfg {
+    single_data_cfg single_data;
+};
+
+// ------------
+// PreSelection
+// ------------
+
+struct preSelection_input_cfg {
+    std::string input_data = "";
+    std::string input_tree = "";
+    int dataset_min = 0;
+    int dataset_max = -1;
+    std::vector<double> thr1;
+    std::vector<double> thr2;
+    std::string run_column = "";
+    std::vector<std::string> thr_columns;   // {detector 1, detector 2}
+};
+
+struct preSelection_output_cfg {
+    std::string output_data = "";
+    std::string output_tree = "";
+    std::vector<std::string> columns;       // columns saved in the snapshot
+};
+
+struct preSelection_cfg {
+    preSelection_input_cfg input;
+    preSelection_output_cfg output;
 };
 
 // ----------
@@ -51,8 +67,8 @@ struct io_config {
 // ----------
 
 struct channels {
-    std::vector<int> gate_channel;
-    std::vector<int> tof_channel;
+    std::vector<int> detector1_channel;
+    std::vector<int> detector2_channel;
     int trigger_channel = -1;
 };
 
@@ -61,18 +77,18 @@ struct hits_channel {
     std::string column_name = "";
 };
 
-struct events_config {
+struct events_cfg {
     bool channel_hits = false;
     std::vector<int> hits;
-    std::string gate_column = " ";
-    std::string tof_column = " ";
+    std::string detector1_column = " ";
+    std::string detector2_column = " ";
 };
 
-struct efficiency_config {
+struct efficiency_cfg {
     std::string eff_mode = "";
     hits_channel hits_ch;
     channels ch;
-    events_config event;
+    events_cfg event;
 };
 
 // --------
@@ -99,7 +115,7 @@ struct first_ToT {
     std::vector<std::string> ToT_first_ToA;
 };
 
-struct analysis_config {
+struct analysis_cfg {
     std::string analysis_mode;
     std::vector<std::vector<int>> channels;
     delta_ToA d_ToA;
@@ -111,25 +127,26 @@ struct analysis_config {
 // Canvas
 // ------
 
-struct plot_config {
+struct plot_cfg {
     int bins;
     double min;
     double max;
     std::string title;
 };
 
-struct canvas_config {
-    plot_config plot_delta_ToA;
-    plot_config plot_ToT;
-    plot_config plot_hits;
+struct canvas_cfg {
+    plot_cfg plot_delta_ToA;
+    plot_cfg plot_ToT;
+    plot_cfg plot_hits;
 };
 
 struct config_struct {
-    general_config general;
-    io_config io;
-    efficiency_config efficiency;
-    analysis_config analysis;
-    canvas_config canvas;
+    general_cfg general;
+    io_cfg io;
+    preSelection_cfg preSelection;
+    efficiency_cfg efficiency;
+    analysis_cfg analysis;
+    canvas_cfg canvas;
 };
 
 // -----------------------

@@ -15,6 +15,4 @@ struct Eff_Container_Multi {
     double eff;
 };
 
-int ProcessAllData(const config_struct& cfg, std::vector<std::string>& paths, std::unordered_map<std::string, std::pair<double, double>>& file_container);
-
 #endif

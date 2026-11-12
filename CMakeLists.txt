@@ -17,6 +17,7 @@ set(COMMON_SRCS
     src/Filter.cpp
     src/Visualizer.cpp
     src/Operations.cpp
+    src/PreSelection.cpp
 )
 
 set(COMMON_LIBS

@@ -119,9 +119,9 @@ ROOT::RDF::RNode EventHits(ROOT::RDF::RNode node, const config_struct& cfg, cons
 // ------------------------------------------------
 
 ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const config_struct& cfg) {
-    std::string ToA_mask =  cfg.io.columns.ToA + "* 3.125/1000";
-    std::string edge_mask = cfg.io.columns.edge + "== 1";
-    std::string channel_mask = cfg.io.columns.channel + "[Mask_Lead]"; 
+    std::string ToA_mask =  cfg.io.single_data.columns.ToA + "* 3.125/1000";
+    std::string edge_mask = cfg.io.single_data.columns.edge + "== 1";
+    std::string channel_mask = cfg.io.single_data.columns.channel + "[Mask_Lead]"; 
     
     node = node
         .Define("ToA_ns", ToA_mask.c_str())
@@ -187,7 +187,7 @@ ROOT::RDF::RNode FirstToA_Node(ROOT::RDF::RNode node, const config_struct& cfg) 
 
 ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg) {
     auto ToT = cfg.analysis.ToT;
-    auto Column = cfg.io.columns;
+    auto Column = cfg.io.single_data.columns;
 
     bool condition = cfg.analysis.ToT.first;
     
@@ -208,10 +208,10 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg)
     };
 
     std::vector<std::vector<int>> channels = cfg.analysis.ToT.channels;
-    std::string ToA_column =  cfg.io.columns.ToA + "* 3.125/1000";
+    std::string ToA_column =  cfg.io.single_data.columns.ToA + "* 3.125/1000";
     
     // Changing clock scale to ns scale
-    //node = node.Define("ToA_ns", ToA_column.c_str());
+    node = node.Define("ToA_ns", ToA_column.c_str());
 
     for (size_t i = 0; i < channels.size(); i++) {
         if(channels[i].size() != ToT.ToT_list[i].size()) {
@@ -229,7 +229,7 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg)
             node = node
                 .Define("Mask_Ch" + ch, channel_column.c_str())
                 
-                .Define("ToA_Ch" + ch, "FD01_ToA[Mask_Ch" + ch + "]")
+                .Define("ToA_Ch" + ch, "ToA_ns[Mask_Ch" + ch + "]")
                 .Define("Edge_Ch" + ch, edge_column.c_str())
                 
                 .Define(tot_col, calc_TOT, {"ToA_Ch" + ch, "Edge_Ch" + ch});
@@ -252,6 +252,7 @@ ROOT::RDF::RNode DefineTOT_Node(ROOT::RDF::RNode node, const config_struct& cfg)
 // MEAN TOA CHANNELS
 // -------------------------------------------------------------------------------------------
 
+/*
 ROOT::RDF::RNode DefineTOA_mean_Node(ROOT::RDF::RNode node, const std::vector<int>& channels) {   
     auto Calculate_stats = [channels](const ROOT::RVec<double>& toa, const ROOT::RVec<unsigned char>& ch) -> std::vector<double> {
         std::vector<double> result;
@@ -310,3 +311,4 @@ ROOT::RDF::RNode DefineTOA_mean_Node(ROOT::RDF::RNode node, const std::vector<in
 
     return node;
 }
+*/
